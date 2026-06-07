@@ -15,20 +15,24 @@ class DashboardController extends Controller
 {
     public function index(Request $request): Response
     {
-        $totalAppointments = Appointment::count();
-        $todayAppointments = Appointment::whereDate('start_time', today())->count();
-        $totalRevenue = Appointment::where('status', 'completed')->sum('total_amount');
-        $totalUsers = User::count();
-        $totalProducts = Product::sum('stock');
+        $now = today();
+        $dateFrom = $request->date_from ? Carbon::parse($request->date_from) : $now->copy()->startOfMonth();
+        $dateTo = $request->date_to ? Carbon::parse($request->date_to) : $now->copy()->endOfMonth();
 
-        $dateFrom = $request->date_from ? Carbon::parse($request->date_from) : null;
-        $dateTo = $request->date_to ? Carbon::parse($request->date_to) : null;
+        $employees = User::role('employee')->orderBy('name')->get(['id', 'name']);
 
-        $appointments = Appointment::with(['client', 'customer', 'employee', 'service'])
+        $query = Appointment::query()
             ->when($request->status, fn ($q, $s) => $q->where('status', $s))
             ->when($request->employee_id, fn ($q, $id) => $q->where('employee_id', $id))
-            ->when($dateFrom, fn ($q) => $q->whereDate('start_time', '>=', $dateFrom))
-            ->when($dateTo, fn ($q) => $q->whereDate('start_time', '<=', $dateTo))
+            ->whereDate('start_time', '>=', $dateFrom)
+            ->whereDate('start_time', '<=', $dateTo);
+
+        $rangeAppointments = (clone $query)->count();
+        $rangeCompleted = (clone $query)->where('status', 'completed')->count();
+        $rangeRevenue = (clone $query)->where('status', 'completed')->sum('total_amount');
+
+        $appointments = (clone $query)
+            ->with(['client', 'customer', 'employee', 'service'])
             ->orderBy('start_time', 'desc')
             ->paginate(15)
             ->through(fn ($apt) => [
@@ -42,28 +46,49 @@ class DashboardController extends Controller
                 'total_amount' => $apt->total_amount,
             ]);
 
-        $employees = User::role('employee')->orderBy('name')->get(['id', 'name']);
-
-        $revenueByMonth = Appointment::where('status', 'completed')
-            ->selectRaw('SUM(total_amount) as total, YEAR(start_time) as year, MONTH(start_time) as month')
-            ->groupBy('year', 'month')
-            ->orderBy('year', 'desc')
-            ->orderBy('month', 'desc')
-            ->limit(6)
+        $appointmentsByDay = (clone $query)
+            ->selectRaw('DATE(start_time) as date, COUNT(*) as count')
+            ->groupBy('date')
+            ->orderBy('date')
             ->get()
-            ->map(fn ($r) => ['period' => Carbon::create($r->year, $r->month, 1)->format('M Y'), 'total' => (float) $r->total]);
+            ->map(fn ($r) => ['date' => $r->date, 'count' => $r->count]);
+
+        $revenueByDay = (clone $query)
+            ->where('status', 'completed')
+            ->selectRaw('DATE(start_time) as date, SUM(total_amount) as total')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->map(fn ($r) => ['date' => $r->date, 'total' => (float) $r->total]);
+
+        $revenueByEmployee = (clone $query)
+            ->where('status', 'completed')
+            ->selectRaw('employee_id, SUM(total_amount) as total')
+            ->groupBy('employee_id')
+            ->with('employee:id,name')
+            ->get()
+            ->map(fn ($r) => ['employee_name' => $r->employee?->name ?? '—', 'total' => (float) $r->total])
+            ->sortByDesc('total')
+            ->values();
 
         return Inertia::render('admin/dashboard', [
             'stats' => [
-                'total_appointments' => $totalAppointments,
-                'today_appointments' => $todayAppointments,
-                'total_revenue' => $totalRevenue,
-                'total_users' => $totalUsers,
-                'total_products' => $totalProducts,
+                'range_appointments' => $rangeAppointments,
+                'range_completed' => $rangeCompleted,
+                'range_revenue' => $rangeRevenue,
+                'total_products' => Product::sum('stock'),
+                'total_users' => User::count(),
             ],
             'appointments' => static::paginateResponse($appointments),
-            'revenue_by_month' => $revenueByMonth,
-            'filters' => $request->only(['status', 'employee_id', 'date_from', 'date_to']),
+            'appointments_by_day' => $appointmentsByDay,
+            'revenue_by_day' => $revenueByDay,
+            'revenue_by_employee' => $revenueByEmployee,
+            'filters' => [
+                'date_from' => $dateFrom->format('Y-m-d'),
+                'date_to' => $dateTo->format('Y-m-d'),
+                'employee_id' => $request->employee_id ?? '',
+                'status' => $request->status ?? '',
+            ],
             'employees' => $employees,
         ]);
     }

@@ -260,29 +260,42 @@ export default function BookingWizard({ services, productCategories, initialServ
     const displayServices = showAllServices ? services : services.slice(0, 5);
     const hasMore = services.length > 5;
 
+    function goToStep(s: number) {
+        if (s >= step) return;
+        if (s === 6 && !shouldSubmitAfterAuth) return;
+        setStep(s);
+    }
+
     function renderStepIndicator() {
         return (
             <div className="flex items-center justify-center gap-1 sm:gap-2">
                 {STEP_LABELS.map((label, i) => {
                     const s = i + 1;
+                    const clickable = s < step;
                     return (
                         <div key={s} className="flex items-center gap-1 sm:gap-2">
-                            <div className={`flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full text-xs sm:text-sm font-medium transition-colors ${
-                                s === step
-                                    ? 'bg-amber-500 text-stone-900'
-                                    : s < step
-                                        ? 'bg-amber-500/20 text-amber-400'
-                                        : 'bg-stone-800 text-stone-500'
-                            }`}>
+                            <div
+                                onClick={() => clickable && goToStep(s)}
+                                className={`flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full text-xs sm:text-sm font-medium transition-colors ${
+                                    s === step
+                                        ? 'bg-amber-500 text-stone-900'
+                                        : s < step
+                                            ? 'bg-amber-500/20 text-amber-400 cursor-pointer hover:bg-amber-500/30'
+                                            : 'bg-stone-800 text-stone-500'
+                                }`}
+                            >
                                 {s < step ? (
                                     <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                                 ) : (
                                     s
                                 )}
                             </div>
-                            <span className={`hidden sm:block text-xs ${
-                                s === step ? 'text-amber-400 font-medium' : s < step ? 'text-amber-400/70' : 'text-stone-500'
-                            }`}>
+                            <span
+                                onClick={() => clickable && goToStep(s)}
+                                className={`hidden sm:block text-xs ${
+                                    s === step ? 'text-amber-400 font-medium' : s < step ? 'text-amber-400/70 cursor-pointer hover:text-amber-300' : 'text-stone-500'
+                                }`}
+                            >
                                 {label}
                             </span>
                             {s < 6 && (

@@ -68,9 +68,7 @@ Route::get('/', function () {
 
 Route::redirect('booking', '/')->name('booking');
 
-Route::middleware(['auth'])->group(function () {
-    Route::inertia('dashboard', 'dashboard')->name('dashboard');
-});
+Route::redirect('/admin', '/admin/dashboard');
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');

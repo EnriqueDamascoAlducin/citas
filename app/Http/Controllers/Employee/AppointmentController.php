@@ -69,6 +69,6 @@ class AppointmentController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Cita actualizada.']);
 
-        return to_route('employee.appointments.index');
+        return to_route('employee.appointments.index', $request->only(['date_from', 'date_to', 'employee_id']));
     }
 }

@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Calendar, FolderGit2, LayoutGrid, Scissors, Package, CalendarCheck, ShieldCheck, Users, ContactRound } from 'lucide-react';
+import { BookOpen, Calendar, FolderGit2, LayoutGrid, Scissors, Package, CalendarCheck, Users, ContactRound } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -13,7 +13,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
+import { dashboard } from '@/routes/admin';
 import type { NavItem } from '@/types';
 
 const baseNavItems: NavItem[] = [
@@ -26,15 +26,10 @@ const baseNavItems: NavItem[] = [
 
 const footerNavItems: NavItem[] = [
     {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
+        title: 'Creator',
+        href: 'https://myflight.com.mx',
         icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
+    }
 ];
 
 export function AppSidebar() {
@@ -45,11 +40,6 @@ export function AppSidebar() {
 
     if (isLoggedIn) {
         extraNavItems.push(
-            {
-                title: 'Panel Admin',
-                href: '/admin/dashboard',
-                icon: ShieldCheck,
-            },
             {
                 title: 'Mi Horario',
                 href: '/employee/schedule',

@@ -1,6 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { useState, useCallback } from 'react';
-import { dashboard } from '@/routes';
+import { dashboard } from '@/routes/admin';
 import { Scissors, Clock, MapPin, Calendar, Star } from 'lucide-react';
 import BookingWizard from '@/components/booking-wizard';
 

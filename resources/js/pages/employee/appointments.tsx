@@ -48,7 +48,9 @@ export default function EmployeeAppointments({ appointments, date_from, date_to,
     }
 
     function updateStatus(id: number, status: string) {
-        router.patch(`/employee/appointments/${id}/status`, { status });
+        const params: Record<string, string> = { status, date_from: from, date_to: to };
+        if (is_admin && filterEmpId) params.employee_id = filterEmpId;
+        router.patch(`/employee/appointments/${id}/status`, params);
     }
 
     const statusLabel: Record<string, string> = { pending: 'Pendiente', confirmed: 'Confirmada', completed: 'Completada', cancelled: 'Cancelada' };
