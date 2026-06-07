@@ -1,6 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { register as registerRoute } from '@/routes';
 
 export default function CustomerLogin() {
     const [form, setForm] = useState({ email: '', password: '' });
@@ -53,7 +52,7 @@ export default function CustomerLogin() {
                         </button>
                         <p className="text-center text-sm text-stone-400">
                             ¿No tienes cuenta?{' '}
-                            <Link href={registerRoute()} className="text-amber-400 hover:text-amber-300">Regístrate</Link>
+                            <Link href="/cliente/register" className="text-amber-400 hover:text-amber-300">Regístrate</Link>
                         </p>
                     </div>
                     <p className="text-center text-sm text-stone-500">
