@@ -20,7 +20,14 @@ class StoreUserRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($userId)],
             'password' => $userId ? ['nullable', 'string', 'min:8'] : ['required', 'string', 'min:8'],
-            'role' => ['required', 'string', 'exists:roles,name'],
+            'role' => [
+                'required',
+                'string',
+                Rule::exists('roles', 'name')->when(
+                    ! $this->user()->hasRole('super-admin'),
+                    fn ($rule) => $rule->whereNot('name', 'super-admin'),
+                ),
+            ],
         ];
     }
 

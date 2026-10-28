@@ -44,8 +44,16 @@ class ServiceController extends Controller
         return to_route('admin.services.index');
     }
 
-    public function destroy(Service $service): RedirectResponse
+    public function destroy(Request $request, Service $service): RedirectResponse
     {
+        abort_unless($request->user()->can('manage-services'), 403);
+
+        if ($service->appointments()->exists()) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => 'El servicio tiene citas registradas. Desactívalo en lugar de eliminarlo.']);
+
+            return to_route('admin.services.index');
+        }
+
         $service->delete();
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Servicio eliminado correctamente.']);

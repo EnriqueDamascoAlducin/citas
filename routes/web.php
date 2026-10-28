@@ -70,7 +70,7 @@ Route::redirect('booking', '/')->name('booking');
 
 Route::redirect('/admin', '/admin/dashboard');
 
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('services', ServiceController::class)->except(['show']);
     Route::resource('products', ProductController::class)->except(['show']);
@@ -81,7 +81,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::delete('customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
 });
 
-Route::middleware(['auth'])->prefix('employee')->name('employee.')->group(function () {
+Route::middleware(['auth', 'role:employee|admin|super-admin'])->prefix('employee')->name('employee.')->group(function () {
     Route::get('appointments', [EmployeeAppointmentController::class, 'index'])->name('appointments.index');
     Route::patch('appointments/{appointment}/status', [EmployeeAppointmentController::class, 'updateStatus'])->name('appointments.update-status');
 

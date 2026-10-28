@@ -46,6 +46,8 @@ class UserController extends Controller
 
     public function update(StoreUserRequest $request, User $user): RedirectResponse
     {
+        abort_if($user->hasRole('super-admin') && ! $request->user()->hasRole('super-admin'), 403);
+
         $data = $request->validated();
 
         $user->update([
@@ -61,9 +63,16 @@ class UserController extends Controller
         return to_route('admin.users.index');
     }
 
-    public function destroy(User $user): RedirectResponse
+    public function destroy(Request $request, User $user): RedirectResponse
     {
-        abort_if($user->hasRole('super-admin'), 403);
+        abort_unless($request->user()->can('manage-employees'), 403);
+        abort_if($user->hasRole('super-admin') || $user->is($request->user()), 403);
+
+        if ($user->employeeAppointments()->exists()) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => 'El usuario tiene citas asignadas como empleado; no se puede eliminar.']);
+
+            return to_route('admin.users.index');
+        }
 
         $user->delete();
 

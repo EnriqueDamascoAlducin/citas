@@ -59,6 +59,7 @@ class PaymentController extends Controller
                     'pending' => route('customer.dashboard'),
                 ],
                 'auto_return' => 'approved',
+                ...$this->notificationUrl(),
             ]);
         } catch (MPApiException $e) {
             Log::error('MP API Error', [
@@ -119,6 +120,7 @@ class PaymentController extends Controller
                     ],
                 ],
                 'external_reference' => (string) $appointment->id,
+                ...$this->notificationUrl(),
             ]);
 
             $status = match ($payment->status) {
@@ -156,5 +158,16 @@ class PaymentController extends Controller
                 'error' => 'Error al procesar el pago: '.$e->getApiResponse()->getContent(),
             ], 422);
         }
+    }
+
+    /**
+     * Mercado Pago solo acepta URLs públicas; en local (http://localhost) se omite
+     * y el webhook se configura desde el panel de MP.
+     */
+    private function notificationUrl(): array
+    {
+        $url = route('webhook.mp');
+
+        return str_starts_with($url, 'https://') ? ['notification_url' => $url] : [];
     }
 }

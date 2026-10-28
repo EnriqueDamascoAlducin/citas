@@ -21,9 +21,11 @@ class CustomerController extends Controller
         ]);
     }
 
-    public function destroy(Customer $customer): RedirectResponse
+    public function destroy(Request $request, Customer $customer): RedirectResponse
     {
-        $customer->appointments()->delete();
+        abort_unless($request->user()->can('manage-employees'), 403);
+
+        // Las citas y pagos se conservan; customer_id queda en null.
         $customer->delete();
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Cliente eliminado correctamente.']);

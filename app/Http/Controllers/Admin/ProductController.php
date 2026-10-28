@@ -50,8 +50,16 @@ class ProductController extends Controller
         return to_route('admin.products.index');
     }
 
-    public function destroy(Product $product): RedirectResponse
+    public function destroy(Request $request, Product $product): RedirectResponse
     {
+        abort_unless($request->user()->can('manage-products'), 403);
+
+        if ($product->appointments()->exists()) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => 'El producto aparece en citas registradas. Desactívalo en lugar de eliminarlo.']);
+
+            return to_route('admin.products.index');
+        }
+
         $product->delete();
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Producto eliminado correctamente.']);
