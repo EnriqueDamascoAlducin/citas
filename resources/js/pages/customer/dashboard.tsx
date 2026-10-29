@@ -1,7 +1,31 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Calendar, Clock, CreditCard, Scissors } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
 import { loadMercadoPago } from '@mercadopago/sdk-js';
+import { useEffect, useRef, useState } from 'react';
+import { SiteLayout, btnPrimary, formatPrice } from '@/components/site/site-shell';
+
+const STATUS: Record<string, { label: string; dot: string }> = {
+    pending: { label: 'Pendiente de pago', dot: 'bg-amber-500' },
+    confirmed: { label: 'Confirmada', dot: 'bg-emerald-500' },
+    completed: { label: 'Completada', dot: 'bg-stone-500' },
+    cancelled: { label: 'Cancelada', dot: 'bg-red-500' },
+};
+
+const DAY_LONG = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+const MONTH_LONG = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+function formatDate(value: string): { day: string; rest: string } {
+    const [y, m, d] = value.split('-').map(Number);
+    const date = new Date(y, m - 1, d);
+
+    return { day: String(d), rest: `${DAY_LONG[date.getDay()]}, ${MONTH_LONG[m - 1]}` };
+}
+
+function todayLocal(): string {
+    const d = new Date();
+    const pad = (n: number) => String(n).padStart(2, '0');
+
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
 
 type Appointment = {
     id: number;
@@ -18,22 +42,16 @@ type Appointment = {
 type PageProps = {
     logoImage?: string;
     mercadopago?: { public_key: string };
+    auth: { customer?: { name: string } | null };
 };
 
 export default function CustomerDashboard({ appointments }: { appointments: Appointment[] }) {
-    const { logoImage, mercadopago } = usePage().props as PageProps;
+    const { logoImage, mercadopago, auth } = usePage().props as unknown as PageProps;
     const [payingId, setPayingId] = useState<number | null>(null);
     const [brickReady, setBrickReady] = useState(false);
     const [payError, setPayError] = useState<string | null>(null);
     const brickContainerRef = useRef<HTMLDivElement>(null);
     const brickControllerRef = useRef<any>(null);
-
-    const statusStyles: Record<string, string> = {
-        pending: 'bg-yellow-500/10 text-yellow-400',
-        confirmed: 'bg-green-500/10 text-green-400',
-        completed: 'bg-blue-500/10 text-blue-400',
-        cancelled: 'bg-red-500/10 text-red-400',
-    };
 
     useEffect(() => {
         loadMercadoPago()
@@ -46,24 +64,27 @@ export default function CustomerDashboard({ appointments }: { appointments: Appo
             });
     }, []);
 
-    function handleLogout() {
-        router.post('/cliente/logout');
-    }
-
     async function openCardBrick(apt: Appointment) {
         setPayError(null);
+
         if (!mercadopago?.public_key) {
             setPayError('Falta configurar la llave pública de Mercado Pago.');
+
             return;
         }
+
         if (!brickReady) {
             setPayError('Mercado Pago aún se está cargando, espera un momento e inténtalo de nuevo.');
+
             return;
         }
+
         setPayingId(apt.id);
 
         setTimeout(async () => {
-            if (!brickContainerRef.current) return;
+            if (!brickContainerRef.current) {
+return;
+}
 
             const mp = new (window as any).MercadoPago(mercadopago.public_key, { locale: 'es-MX' });
             const bricksBuilder = mp.bricks();
@@ -103,12 +124,15 @@ export default function CustomerDashboard({ appointments }: { appointments: Appo
                             })
                                 .then(async (res) => {
                                     const data = await res.json().catch(() => ({}));
+
                                     if (res.ok && data.success) {
                                         resolve();
                                         setPayingId(null);
                                         router.reload();
+
                                         return;
                                     }
+
                                     const msg =
                                         data.error ||
                                         (data.errors ? Object.values(data.errors).flat().join(' ') : null) ||
@@ -149,123 +173,113 @@ export default function CustomerDashboard({ appointments }: { appointments: Appo
             brickControllerRef.current.unmount();
             brickControllerRef.current = null;
         }
+
         setPayingId(null);
+    }
+
+    const today = todayLocal();
+    const upcoming = appointments
+        .filter((a) => a.date >= today && ['pending', 'confirmed'].includes(a.status))
+        .sort((a, b) => `${a.date}${a.start_time}`.localeCompare(`${b.date}${b.start_time}`));
+    const past = appointments.filter((a) => !upcoming.includes(a));
+    const firstName = auth.customer?.name.split(' ')[0];
+
+    function renderAppointment(apt: Appointment) {
+        const status = STATUS[apt.status] ?? { label: apt.status, dot: 'bg-stone-500' };
+        const { day, rest } = formatDate(apt.date);
+
+        return (
+            <li key={apt.id} className="py-6">
+                <div className="grid gap-4 sm:grid-cols-[88px_1fr_auto] sm:gap-6">
+                    <div className="flex items-baseline gap-2 sm:block">
+                        <p className="font-display text-5xl leading-none font-bold tabular-nums">{day}</p>
+                        <p className="text-sm text-stone-400 sm:mt-1">{rest}</p>
+                    </div>
+
+                    <div className="min-w-0">
+                        <p className="text-lg font-medium">{apt.service}</p>
+                        <p className="mt-0.5 text-sm text-stone-400">
+                            {apt.start_time}–{apt.end_time} con {apt.employee}
+                        </p>
+                        <p className="mt-2 flex items-center gap-2 text-sm text-stone-300">
+                            <span className={`h-2 w-2 rounded-full ${status.dot}`} aria-hidden />
+                            {status.label}
+                        </p>
+                        {apt.notes && <p className="mt-2 text-sm text-stone-500">Notas: {apt.notes}</p>}
+                    </div>
+
+                    <div className="flex items-center justify-between gap-4 sm:flex-col sm:items-end sm:justify-start">
+                        <p className="font-display text-2xl font-semibold tabular-nums">{formatPrice(apt.total_amount)}</p>
+                        {apt.status === 'pending' && payingId !== apt.id && (
+                            <button type="button" onClick={() => openCardBrick(apt)} className={btnPrimary}>
+                                Pagar con tarjeta
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                {payingId === apt.id && (
+                    <div className="mt-5 border border-stone-800 bg-stone-900 p-4 sm:ml-[112px]">
+                        <div className="mb-3 flex items-center justify-between">
+                            <p className="text-sm text-stone-300">Pago de {formatPrice(apt.total_amount)}</p>
+                            <button type="button" onClick={cancelPayment} className="cursor-pointer text-sm text-stone-500 hover:text-stone-200">
+                                Cancelar
+                            </button>
+                        </div>
+                        <div id="cardPaymentBrick_container" ref={brickContainerRef} />
+                    </div>
+                )}
+            </li>
+        );
     }
 
     return (
         <>
-            <Head title="Mi Cuenta" />
-            <div className="min-h-screen bg-gradient-to-b from-stone-950 via-stone-900 to-stone-950 text-stone-100">
-                <div className="fixed inset-0 pointer-events-none opacity-[0.03]"
-                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f59e0b' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` }}
-                />
-
-                <header className="relative z-20 flex items-center justify-between px-6 py-4 lg:px-12">
-                    <Link href="/">
-                        <img src={logoImage || '/storage/images/logo.png'} alt="BarberShop" className="h-10 w-auto" />
-                    </Link>
-                    <nav className="flex items-center gap-6">
-                        <Link href="/" className="text-sm text-stone-400 hover:text-amber-400 transition-colors">Inicio</Link>
-                        <button onClick={handleLogout} className="text-sm text-stone-400 hover:text-amber-400 transition-colors cursor-pointer">
-                            Cerrar Sesión
-                        </button>
-                    </nav>
-                </header>
-
-                <main className="relative mx-auto max-w-3xl px-6 py-10">
-                    <div className="text-center">
-                        <h1 className="text-3xl font-bold">Mis Citas</h1>
-                        <p className="mt-1 text-stone-400">Historial de tus citas agendadas</p>
+            <Head title="Mis citas" />
+            <SiteLayout logoImage={logoImage}>
+                <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
+                    <div className="flex flex-wrap items-end justify-between gap-4 border-b border-stone-800 pb-5">
+                        <div>
+                            {firstName && <p className="text-sm text-stone-400">Hola, {firstName}</p>}
+                            <h1 className="font-display text-5xl font-bold uppercase">Mis citas</h1>
+                        </div>
+                        <Link href="/#agendar" className={btnPrimary}>
+                            Nueva cita
+                        </Link>
                     </div>
 
                     {payError && (
-                        <div className="mt-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+                        <div role="alert" className="mt-6 border-l-2 border-red-500 bg-red-950/40 px-4 py-3 text-sm text-red-300">
                             {payError}
                         </div>
                     )}
 
-                    <div className="mt-8 space-y-4">
-                        {appointments.length === 0 ? (
-                            <div className="rounded-xl border border-stone-800 bg-stone-900/50 p-8 text-center">
-                                <Calendar className="mx-auto h-12 w-12 text-stone-600" />
-                                <h3 className="mt-4 text-lg font-medium text-stone-400">No tienes citas</h3>
-                                <p className="mt-1 text-sm text-stone-500">Agenda tu primera cita desde la página principal.</p>
-                                <Link href="/" className="mt-4 inline-block rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-stone-900 hover:bg-amber-400 transition-colors">
-                                    Agendar Cita
-                                </Link>
-                            </div>
-                        ) : (
-                            appointments.map((apt) => (
-                                <div key={apt.id} className="rounded-xl border border-stone-800 bg-stone-900/50 p-5 transition hover:border-stone-700">
-                                    <div className="flex items-start justify-between">
-                                        <div>
-                                            <h3 className="font-semibold">{apt.service}</h3>
-                                            <p className="mt-1 text-sm text-stone-400">con {apt.employee}</p>
-                                        </div>
-                                        <span className={`rounded-full px-3 py-1 text-xs font-medium ${statusStyles[apt.status] || 'bg-stone-800 text-stone-400'}`}>
-                                            {apt.status === 'pending' ? 'Pendiente' :
-                                             apt.status === 'confirmed' ? 'Confirmada' :
-                                             apt.status === 'completed' ? 'Completada' :
-                                             apt.status === 'cancelled' ? 'Cancelada' : apt.status}
-                                        </span>
-                                    </div>
-                                    <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-stone-400">
-                                        <span className="flex items-center gap-1">
-                                            <Calendar className="h-4 w-4" />
-                                            {apt.date}
-                                        </span>
-                                        <span className="flex items-center gap-1">
-                                            <Clock className="h-4 w-4" />
-                                            {apt.start_time} - {apt.end_time}
-                                        </span>
-                                        <span className="flex items-center gap-1">
-                                            <Scissors className="h-4 w-4" />
-                                            ${Number(apt.total_amount).toFixed(2)}
-                                        </span>
-                                    </div>
-                                    {apt.notes && (
-                                        <p className="mt-2 text-sm text-stone-500">Notas: {apt.notes}</p>
-                                    )}
-                                    {apt.status === 'pending' && payingId !== apt.id && (
-                                        <div className="mt-3 flex justify-end">
-                                            <button
-                                                onClick={() => openCardBrick(apt)}
-                                                className="flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-stone-900 hover:bg-amber-400 transition-colors"
-                                            >
-                                                <CreditCard className="h-4 w-4" />
-                                                Pagar con Tarjeta
-                                            </button>
-                                        </div>
-                                    )}
-                                    {payingId === apt.id && (
-                                        <div className="mt-4 rounded-xl border border-stone-700 bg-stone-800/50 p-4">
-                                            <div className="mb-3 flex items-center justify-between">
-                                                <p className="text-sm font-medium text-stone-300">
-                                                    Pagar — ${Number(apt.total_amount).toFixed(2)}
-                                                </p>
-                                                <button
-                                                    onClick={cancelPayment}
-                                                    className="text-sm text-stone-500 hover:text-stone-300 transition-colors"
-                                                >
-                                                    Cancelar
-                                                </button>
-                                            </div>
-                                            <div id="cardPaymentBrick_container" ref={brickContainerRef} />
-                                        </div>
-                                    )}
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </main>
+                    {appointments.length === 0 ? (
+                        <div className="py-16">
+                            <p className="text-lg">Todavía no tienes citas.</p>
+                            <p className="mt-1 text-stone-400">Elige un servicio y un horario desde la página principal.</p>
+                        </div>
+                    ) : (
+                        <>
+                            <section className="mt-8">
+                                <h2 className="text-xs uppercase tracking-wider text-stone-500">Próximas</h2>
+                                {upcoming.length === 0 ? (
+                                    <p className="py-6 text-stone-400">No tienes citas próximas.</p>
+                                ) : (
+                                    <ul className="divide-y divide-stone-800">{upcoming.map(renderAppointment)}</ul>
+                                )}
+                            </section>
 
-                <footer className="relative border-t border-stone-800/50 px-6 py-10 text-center text-sm text-stone-600 lg:px-12">
-                    <div className="flex items-center justify-center gap-2">
-                        <img src={logoImage || '/storage/images/logo.png'} alt="BarberShop" className="h-8 w-auto" />
-                    </div>
-                    <p className="mt-2">© {new Date().getFullYear()} — Todos los derechos reservados</p>
-                </footer>
-            </div>
+                            {past.length > 0 && (
+                                <section className="mt-10 border-t border-stone-800 pt-8">
+                                    <h2 className="text-xs uppercase tracking-wider text-stone-500">Historial</h2>
+                                    <ul className="divide-y divide-stone-800 opacity-80">{past.map(renderAppointment)}</ul>
+                                </section>
+                            )}
+                        </>
+                    )}
+                </div>
+            </SiteLayout>
         </>
     );
 }

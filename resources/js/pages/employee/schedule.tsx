@@ -1,12 +1,12 @@
 import { Form, Head } from '@inertiajs/react';
-import { useState } from 'react';
 import { router } from '@inertiajs/react';
+import { useState } from 'react';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Service } from '@/types';
 
@@ -91,6 +91,7 @@ export default function EmployeeSchedule({ schedules, exceptions, employees, sel
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {Array.from({ length: 7 }, (_, i) => i).map((day) => {
                         const daySchedules = schedules[String(day)] ?? [];
+
                         return (
                             <Card key={day}>
                                 <CardHeader>

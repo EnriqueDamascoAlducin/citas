@@ -11,8 +11,16 @@ export type User = {
     [key: string]: unknown;
 };
 
+export type Customer = {
+    id: number;
+    name: string;
+    email: string;
+    phone: string | null;
+};
+
 export type Auth = {
     user: User;
+    customer: Customer | null;
 };
 
 /* @chisel-passkeys */

@@ -16,9 +16,10 @@ class StoreAppointmentRequest extends FormRequest
         return [
             'service_id' => ['required', 'exists:services,id'],
             'employee_id' => ['required', 'exists:users,id'],
-            'date' => ['required', 'date_format:Y-m-d'],
+            'date' => ['required', 'date_format:Y-m-d', 'after_or_equal:today'],
             'start_time' => ['required', 'date_format:H:i'],
-            'end_time' => ['required', 'date_format:H:i', 'after:start_time'],
+            // Se ignora: el fin se calcula con la duración del servicio.
+            'end_time' => ['nullable', 'date_format:H:i'],
             'notes' => ['nullable', 'string', 'max:1000'],
             'products' => ['nullable', 'array'],
             'products.*.id' => ['required_with:products', 'exists:products,id'],

@@ -1,9 +1,9 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import Heading from '@/components/heading';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 
 type AppointmentItem = {
     id: number;
@@ -43,13 +43,21 @@ export default function EmployeeAppointments({ appointments, date_from, date_to,
 
     function applyFilter() {
         const params: Record<string, string> = { date_from: from, date_to: to };
-        if (is_admin && filterEmpId) params.employee_id = filterEmpId;
+
+        if (is_admin && filterEmpId) {
+params.employee_id = filterEmpId;
+}
+
         router.get('/employee/appointments', params);
     }
 
     function updateStatus(id: number, status: string) {
         const params: Record<string, string> = { status, date_from: from, date_to: to };
-        if (is_admin && filterEmpId) params.employee_id = filterEmpId;
+
+        if (is_admin && filterEmpId) {
+params.employee_id = filterEmpId;
+}
+
         router.patch(`/employee/appointments/${id}/status`, params);
     }
 

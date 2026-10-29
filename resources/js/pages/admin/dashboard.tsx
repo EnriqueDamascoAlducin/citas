@@ -1,10 +1,10 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, AreaChart, Area, Cell } from 'recharts';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, AreaChart, Area, Cell } from 'recharts';
 
 type AppointmentItem = {
     id: number;
@@ -45,6 +45,7 @@ function dateRangeLabel(from: string, to: string) {
     const f = new Date(from + 'T00:00:00');
     const t = new Date(to + 'T00:00:00');
     const opts: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric', year: 'numeric' };
+
     return `${f.toLocaleDateString('es-MX', opts)} — ${t.toLocaleDateString('es-MX', opts)}`;
 }
 

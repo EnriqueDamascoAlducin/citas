@@ -1,12 +1,12 @@
 import { Head, router } from '@inertiajs/react';
-import { useState } from 'react';
 import { Form } from '@inertiajs/react';
+import { useState } from 'react';
 import Heading from '@/components/heading';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type UserItem = {
@@ -121,7 +121,11 @@ export default function UsersIndex({ users, roles }: PageProps) {
                 )}
             </div>
 
-            <Dialog open={showModal} onOpenChange={(open) => { if (!open) closeModal(); }}>
+            <Dialog open={showModal} onOpenChange={(open) => {
+ if (!open) {
+closeModal();
+} 
+}}>
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>{editingUser ? 'Editar Usuario' : 'Nuevo Usuario'}</DialogTitle>

@@ -1,12 +1,12 @@
 import { Form, Head } from '@inertiajs/react';
-import { useState } from 'react';
 import { router } from '@inertiajs/react';
+import { useState } from 'react';
 import Heading from '@/components/heading';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import type { Service } from '@/types';
 
 type ProductCategory = {
@@ -157,7 +157,11 @@ export default function ProductsIndex({ products, categories, filters }: PagePro
                 )}
             </div>
 
-            <Dialog open={showModal} onOpenChange={(open) => { if (!open) closeModal(); }}>
+            <Dialog open={showModal} onOpenChange={(open) => {
+ if (!open) {
+closeModal();
+} 
+}}>
                 <DialogContent className="sm:max-w-lg">
                     <DialogHeader>
                         <DialogTitle>{editingProduct ? 'Editar Producto' : 'Nuevo Producto'}</DialogTitle>
