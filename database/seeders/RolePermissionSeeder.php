@@ -39,6 +39,7 @@ class RolePermissionSeeder extends Seeder
         $admin = Role::findOrCreate('admin', 'web');
         $admin->givePermissionTo([
             'view-dashboard',
+            'view-board',
             'manage-customers',
             'view-any-appointment',
             'view-appointments',

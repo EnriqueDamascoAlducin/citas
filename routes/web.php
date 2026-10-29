@@ -18,7 +18,10 @@ use App\Http\Controllers\Employee\ScheduleController;
 use App\Http\Controllers\Employee\ScheduleExceptionController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Professional\AgendaController as ProfessionalAgendaController;
+use App\Http\Controllers\Professional\AppointmentBoardController;
 use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\Webhooks\TwilioWhatsAppController;
+use App\Http\Middleware\VerifyTwilioSignature;
 use App\Models\Appointment;
 use App\Models\ProductCategory;
 use App\Models\Service;
@@ -119,6 +122,11 @@ Route::get('profesional', ProfessionalAgendaController::class)
     ->middleware(['auth', 'can:'.Permission::ViewAppointments->value])
     ->name('professional.agenda');
 
+// Pantalla de próximas citas para la TV de recepción.
+Route::get('tablero', AppointmentBoardController::class)
+    ->middleware(['auth', 'can:'.Permission::ViewBoard->value])
+    ->name('board');
+
 Route::post('appointments', [AppointmentController::class, 'store'])->name('appointments.store');
 
 Route::post('payments/preference', [PaymentController::class, 'createPreference'])->name('payments.preference');
@@ -137,6 +145,11 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::post('webhook/mercadopago', [WebhookController::class, 'mpIpn'])->name('webhook.mp');
+
+// Respuestas al recordatorio de WhatsApp. Twilio firma cada petición.
+Route::post('webhooks/twilio/whatsapp', TwilioWhatsAppController::class)
+    ->middleware([VerifyTwilioSignature::class, 'throttle:120,1'])
+    ->name('webhooks.twilio.whatsapp');
 
 Route::prefix('cliente')->name('customer.')->group(function () {
     Route::get('login', [CustomerAuthController::class, 'showLogin'])->name('login');

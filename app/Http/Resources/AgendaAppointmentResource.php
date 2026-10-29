@@ -33,6 +33,7 @@ class AgendaAppointmentResource extends JsonResource
                 'quantity' => $product->pivot->quantity,
             ]),
             'total_amount' => (float) $this->total_amount,
+            'client_confirmed' => $this->client_confirmed_at !== null,
             'is_paid' => $this->payments->contains(fn ($payment) => in_array($payment->status, ['approved', 'paid'], true)),
         ];
     }

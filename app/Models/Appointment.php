@@ -22,6 +22,10 @@ class Appointment extends Model
         'status',
         'notes',
         'total_amount',
+        'reminder_sent_at',
+        'reminder_message_sid',
+        'reminder_error',
+        'client_confirmed_at',
     ];
 
     protected function casts(): array
@@ -30,7 +34,23 @@ class Appointment extends Model
             'start_time' => 'datetime',
             'end_time' => 'datetime',
             'total_amount' => 'decimal:2',
+            'reminder_sent_at' => 'datetime',
+            'client_confirmed_at' => 'datetime',
         ];
+    }
+
+    /** Pendientes o confirmadas que empiezan en los próximos $minutes y aún sin recordatorio. */
+    public function scopeDueForReminder(Builder $query, int $minutes): void
+    {
+        $query->whereIn('status', [AppointmentStatus::Pending->value, AppointmentStatus::Confirmed->value])
+            ->whereNull('reminder_sent_at')
+            ->whereBetween('start_time', [now(), now()->addMinutes($minutes)]);
+    }
+
+    /** Quien agendó: cliente con cuenta o, si la hizo alguien del personal, ese usuario. */
+    public function booker(): Customer|User|null
+    {
+        return $this->customer ?? $this->client;
     }
 
     public function scopeForEmployee(Builder $query, User|int $employee): void

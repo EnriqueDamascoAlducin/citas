@@ -26,7 +26,17 @@ export default function CustomerRegister() {
                     <form onSubmit={handleSubmit} className="mt-8 space-y-4">
                         <Field label="Nombre" autoComplete="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} error={errors.name} />
                         <Field label="Correo electrónico" type="email" autoComplete="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} error={errors.email} />
-                        <Field label="Teléfono" type="tel" autoComplete="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} error={errors.phone} placeholder="+52 555 123 4567" />
+                        <Field
+                            label="Teléfono (WhatsApp)"
+                            type="tel"
+                            autoComplete="tel"
+                            required
+                            value={form.phone}
+                            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                            error={errors.phone}
+                            placeholder="+52 555 123 4567"
+                        />
+                        <p className="-mt-2 text-xs text-stone-500">Ahí te enviamos la confirmación y el recordatorio de tus citas.</p>
                         <Field label="Contraseña" type="password" autoComplete="new-password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} error={errors.password} placeholder="Mínimo 8 caracteres" />
                         <Field label="Confirmar contraseña" type="password" autoComplete="new-password" value={form.password_confirmation} onChange={(e) => setForm({ ...form, password_confirmation: e.target.value })} />
                         <button type="submit" className={`${btnPrimary} w-full py-3`}>

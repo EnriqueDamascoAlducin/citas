@@ -36,6 +36,7 @@ beforeEach(function () {
     $this->customer = Customer::create([
         'name' => 'Ana',
         'email' => 'ana@citas.test',
+        'phone' => '+525512345678',
         'password' => 'secreto123',
     ]);
 });

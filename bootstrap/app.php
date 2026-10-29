@@ -17,7 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
-        $middleware->validateCsrfTokens(except: ['webhook/mercadopago']);
+        $middleware->validateCsrfTokens(except: ['webhook/mercadopago', 'webhooks/twilio/whatsapp']);
 
         $middleware->web(append: [
             HandleAppearance::class,

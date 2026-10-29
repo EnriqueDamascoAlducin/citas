@@ -14,6 +14,7 @@ type AgendaAppointment = {
     products: Array<{ name: string; quantity: number }>;
     total_amount: number;
     is_paid: boolean;
+    client_confirmed: boolean;
 };
 
 interface AgendaPageProps {
@@ -190,6 +191,7 @@ export default function ProfessionalAgendaPage({ date, isToday, appointments, su
                                             {apt.service}
                                             {apt.duration_minutes ? ` · ${apt.duration_minutes} min` : ''} · {money(apt.total_amount)}
                                             {apt.is_paid ? ' · pagada' : ''}
+                                            {apt.client_confirmed ? ' · confirmó por WhatsApp' : ''}
                                         </p>
                                         {apt.client.phone && (
                                             <a href={`tel:${apt.client.phone}`} className="inline-flex items-center gap-1 text-sm text-primary hover:underline">

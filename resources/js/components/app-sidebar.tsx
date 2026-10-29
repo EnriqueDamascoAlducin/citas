@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BarChart3, Calendar, CalendarCheck, CalendarDays, ContactRound, FolderGit2, Package, Scissors, Users } from 'lucide-react';
+import { BarChart3, Calendar, CalendarCheck, CalendarDays, ContactRound, FolderGit2, MonitorPlay, Package, Scissors, Users } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -25,6 +25,7 @@ const workItems: GatedNavItem[] = [
 const adminItems: GatedNavItem[] = [
     { title: 'Reportes', href: '/admin/dashboard', icon: BarChart3, permission: 'view-dashboard' },
     { title: 'Todas las citas', href: '/employee/appointments', icon: CalendarCheck, permission: 'view-any-appointment' },
+    { title: 'Tablero de recepción', href: '/tablero', icon: MonitorPlay, permission: 'view-board' },
     { title: 'Servicios', href: '/admin/services', icon: Scissors, permission: 'manage-services' },
     { title: 'Productos', href: '/admin/products', icon: Package, permission: 'manage-products' },
     { title: 'Usuarios y permisos', href: '/admin/users', icon: Users, permission: 'manage-employees' },

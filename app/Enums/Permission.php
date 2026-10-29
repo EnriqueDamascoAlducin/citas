@@ -19,10 +19,12 @@ enum Permission: string
     case ManageCustomers = 'manage-customers';
     case ManageEmployees = 'manage-employees';
     case ManageRoles = 'manage-roles';
+    case ViewBoard = 'view-board';
 
     public function label(): string
     {
         return match ($this) {
+            self::ViewBoard => 'Ver el tablero de próximas citas',
             self::ViewDashboard => 'Ver reportes e ingresos',
             self::ViewAnyAppointment => 'Ver las citas de todos',
             self::ViewAppointments => 'Ver su agenda',
@@ -42,7 +44,7 @@ enum Permission: string
     {
         return match ($this) {
             self::ViewAppointments, self::ManageSchedule, self::CreateAppointments, self::CancelAppointments => 'Agenda',
-            self::ViewDashboard, self::ViewAnyAppointment => 'Reportes',
+            self::ViewDashboard, self::ViewAnyAppointment, self::ViewBoard => 'Reportes',
             self::ManageServices, self::ManageProducts, self::ManageStock => 'Catálogo',
             self::ManageCustomers, self::ManageEmployees, self::ManageRoles => 'Personas',
         };

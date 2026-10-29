@@ -120,6 +120,7 @@ export default function BookingWizard({
         Record<number, number>
     >({});
     const [notes, setNotes] = useState('');
+    const [phone, setPhone] = useState('');
     const [authTab, setAuthTab] = useState<'login' | 'register'>('login');
     const [loginForm, setLoginForm] = useState({ email: '', password: '' });
     const [registerForm, setRegisterForm] = useState({
@@ -175,7 +176,13 @@ export default function BookingWizard({
             step === 6 &&
             !appointmentCreated
         ) {
-            submitBooking();
+            if (auth.customer.phone) {
+                submitBooking();
+            } else {
+                // Cuenta sin teléfono: se pide en el paso de confirmar.
+                setShouldSubmitAfterAuth(false);
+                setStep(5);
+            }
         }
     }, [auth.customer, shouldSubmitAfterAuth, step, appointmentCreated]);
 
@@ -302,7 +309,15 @@ export default function BookingWizard({
         0,
     );
 
+    const needsPhone = !!auth.customer && !auth.customer.phone;
+
     function handleConfirm() {
+        if (needsPhone && phone.trim() === '') {
+            setError('Agrega tu teléfono para enviarte la confirmación de la cita.');
+
+            return;
+        }
+
         if (auth.customer) {
             submitBooking();
         } else {
@@ -341,6 +356,7 @@ export default function BookingWizard({
                 end_time: selectedSlot.end_time,
                 products: productsPayload,
                 notes,
+                ...(needsPhone ? { phone } : {}),
             },
             {
                 preserveState: true,
@@ -947,6 +963,24 @@ export default function BookingWizard({
                             />
                         </label>
 
+                        {needsPhone && (
+                            <div>
+                                <Field
+                                    label="Teléfono (WhatsApp)"
+                                    type="tel"
+                                    autoComplete="tel"
+                                    required
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
+                                    placeholder="+52 555 123 4567"
+                                />
+                                <p className="mt-1.5 text-xs text-stone-500">
+                                    Ahí te enviamos la confirmación y el
+                                    recordatorio de la cita.
+                                </p>
+                            </div>
+                        )}
+
                         <button
                             type="button"
                             onClick={handleConfirm}
@@ -1095,9 +1129,10 @@ export default function BookingWizard({
                                     error={registerErrors.email}
                                 />
                                 <Field
-                                    label="Teléfono"
+                                    label="Teléfono (WhatsApp)"
                                     type="tel"
                                     autoComplete="tel"
+                                    required
                                     value={registerForm.phone}
                                     onChange={(e) =>
                                         setRegisterForm({

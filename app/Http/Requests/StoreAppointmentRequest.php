@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\PhoneNumber;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreAppointmentRequest extends FormRequest
 {
@@ -24,6 +26,21 @@ class StoreAppointmentRequest extends FormRequest
             'products' => ['nullable', 'array'],
             'products.*.id' => ['required_with:products', 'exists:products,id'],
             'products.*.quantity' => ['required_with:products', 'integer', 'min:1'],
+            // La confirmación se manda por teléfono; solo se pide si el cliente aún no tiene uno.
+            'phone' => [
+                Rule::requiredIf(fn () => $this->user('customer') && blank($this->user('customer')->phone)),
+                'nullable',
+                'string',
+                'max:20',
+                new PhoneNumber,
+            ],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'phone.required' => 'Agrega tu teléfono para enviarte la confirmación de la cita.',
         ];
     }
 }

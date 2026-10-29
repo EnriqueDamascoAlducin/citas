@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Service;
 use App\Models\User;
 use App\Services\AvailabilityService;
+use App\Support\PhoneNumber;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -38,6 +39,10 @@ class AppointmentController extends Controller
             ->map(fn ($items) => (int) $items->sum('quantity'));
 
         $isCustomer = Auth::guard('customer')->check();
+
+        if ($isCustomer && $request->filled('phone')) {
+            $request->user('customer')->update(['phone' => PhoneNumber::normalize($request->phone)]);
+        }
 
         $appointment = DB::transaction(function () use ($request, $availability, $service, $date, $startTime, $endTime, $quantities, $isCustomer) {
             // Bloquea al empleado para que dos reservas simultáneas no tomen el mismo horario.
