@@ -9,15 +9,19 @@ import {
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import type { NavItem } from '@/types';
 
-export function NavMain({ items = [] }: { items: NavItem[] }) {
+export function NavMain({ items = [], label }: { items: NavItem[]; label?: string }) {
     const { isCurrentUrl } = useCurrentUrl();
+
+    if (items.length === 0) {
+        return null;
+    }
 
     return (
         <SidebarGroup className="px-2 py-0">
-            <SidebarGroupLabel>Platform</SidebarGroupLabel>
+            {label && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
             <SidebarMenu>
                 {items.map((item) => (
-                    <SidebarMenuItem key={item.href}>
+                    <SidebarMenuItem key={String(item.href)}>
                         <SidebarMenuButton
                             asChild
                             isActive={isCurrentUrl(item.href)}

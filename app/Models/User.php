@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\Permission;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -25,6 +26,19 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Primera pantalla del panel según lo que el usuario tiene permitido.
+     */
+    public function homeUrl(): string
+    {
+        return match (true) {
+            $this->can(Permission::ViewDashboard->value) => route('admin.dashboard'),
+            $this->can(Permission::ViewAppointments->value) => route('professional.agenda'),
+            $this->can(Permission::ViewAnyAppointment->value) => route('employee.appointments.index'),
+            default => route('home'),
+        };
     }
 
     public function appointments(): HasMany

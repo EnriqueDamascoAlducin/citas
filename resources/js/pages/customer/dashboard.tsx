@@ -8,6 +8,7 @@ const STATUS: Record<string, { label: string; dot: string }> = {
     confirmed: { label: 'Confirmada', dot: 'bg-emerald-500' },
     completed: { label: 'Completada', dot: 'bg-stone-500' },
     cancelled: { label: 'Cancelada', dot: 'bg-red-500' },
+    no_show: { label: 'No asististe', dot: 'bg-red-500' },
 };
 
 const DAY_LONG = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
@@ -37,6 +38,8 @@ type Appointment = {
     status: string;
     total_amount: number;
     notes: string | null;
+    products: Array<{ name: string; quantity: number }>;
+    is_paid: boolean;
 };
 
 type PageProps = {
@@ -205,12 +208,16 @@ return;
                             <span className={`h-2 w-2 rounded-full ${status.dot}`} aria-hidden />
                             {status.label}
                         </p>
+                        {apt.products.length > 0 && (
+                            <p className="mt-2 text-sm text-stone-400">Productos: {apt.products.map((p) => `${p.name} ×${p.quantity}`).join(', ')}</p>
+                        )}
                         {apt.notes && <p className="mt-2 text-sm text-stone-500">Notas: {apt.notes}</p>}
                     </div>
 
                     <div className="flex items-center justify-between gap-4 sm:flex-col sm:items-end sm:justify-start">
                         <p className="font-display text-2xl font-semibold tabular-nums">{formatPrice(apt.total_amount)}</p>
-                        {apt.status === 'pending' && payingId !== apt.id && (
+                        {apt.is_paid && <p className="text-sm text-emerald-400">Pagada</p>}
+                        {apt.status === 'pending' && !apt.is_paid && payingId !== apt.id && (
                             <button type="button" onClick={() => openCardBrick(apt)} className={btnPrimary}>
                                 Pagar con tarjeta
                             </button>

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Employee;
 
+use App\Enums\Permission;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpdateAppointmentStatusRequest;
 use App\Models\Appointment;
 use App\Models\User;
 use Carbon\Carbon;
@@ -16,7 +18,7 @@ class AppointmentController extends Controller
     public function index(Request $request): Response
     {
         $user = $request->user();
-        $isAdmin = $user->hasRole('admin') || $user->hasRole('super-admin');
+        $isAdmin = $user->can(Permission::ViewAnyAppointment->value);
 
         $dateFrom = $request->date_from ? Carbon::parse($request->date_from) : today();
         $dateTo = $request->date_to ? Carbon::parse($request->date_to) : clone $dateFrom;
@@ -54,21 +56,13 @@ class AppointmentController extends Controller
         ]);
     }
 
-    public function updateStatus(Request $request, Appointment $appointment): RedirectResponse
+    public function updateStatus(UpdateAppointmentStatusRequest $request, Appointment $appointment): RedirectResponse
     {
-        $user = $request->user();
-        $isAdmin = $user->hasRole('admin') || $user->hasRole('super-admin');
-
-        if (! $isAdmin && $appointment->employee_id !== $user->id) {
-            abort(403);
-        }
-
-        $request->validate(['status' => 'required|in:confirmed,completed,cancelled']);
-
-        $appointment->update(['status' => $request->status]);
+        $appointment->update(['status' => $request->validated('status')]);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Cita actualizada.']);
 
-        return to_route('employee.appointments.index', $request->only(['date_from', 'date_to', 'employee_id']));
+        // Lo usan la lista de citas y la agenda del profesional; back() conserva sus filtros.
+        return back();
     }
 }

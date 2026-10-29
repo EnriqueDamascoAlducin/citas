@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Calendar, FolderGit2, LayoutGrid, Scissors, Package, CalendarCheck, Users, ContactRound } from 'lucide-react';
+import { BarChart3, Calendar, CalendarCheck, CalendarDays, ContactRound, FolderGit2, Package, Scissors, Users } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -13,15 +13,22 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes/admin';
 import type { NavItem } from '@/types';
 
-const baseNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
+type GatedNavItem = NavItem & { permission: string | string[] };
+
+const workItems: GatedNavItem[] = [
+    { title: 'Mi agenda', href: '/profesional', icon: CalendarDays, permission: 'view-appointments' },
+    { title: 'Mi horario', href: '/employee/schedule', icon: Calendar, permission: 'manage-schedule' },
+];
+
+const adminItems: GatedNavItem[] = [
+    { title: 'Reportes', href: '/admin/dashboard', icon: BarChart3, permission: 'view-dashboard' },
+    { title: 'Todas las citas', href: '/employee/appointments', icon: CalendarCheck, permission: 'view-any-appointment' },
+    { title: 'Servicios', href: '/admin/services', icon: Scissors, permission: 'manage-services' },
+    { title: 'Productos', href: '/admin/products', icon: Package, permission: 'manage-products' },
+    { title: 'Usuarios y permisos', href: '/admin/users', icon: Users, permission: 'manage-employees' },
+    { title: 'Clientes', href: '/admin/customers', icon: ContactRound, permission: 'manage-customers' },
 ];
 
 const footerNavItems: NavItem[] = [
@@ -29,49 +36,14 @@ const footerNavItems: NavItem[] = [
         title: 'Creator',
         href: 'https://myflight.com.mx',
         icon: FolderGit2,
-    }
+    },
 ];
 
 export function AppSidebar() {
     const { auth } = usePage().props;
-    const isLoggedIn = !!auth.user;
-
-    const extraNavItems: NavItem[] = [];
-
-    if (isLoggedIn) {
-        extraNavItems.push(
-            {
-                title: 'Mi Horario',
-                href: '/employee/schedule',
-                icon: Calendar,
-            },
-            {
-                title: 'Citas',
-                href: '/employee/appointments',
-                icon: CalendarCheck,
-            },
-            {
-                title: 'Servicios',
-                href: '/admin/services',
-                icon: Scissors,
-            },
-            {
-                title: 'Productos',
-                href: '/admin/products',
-                icon: Package,
-            },
-            {
-                title: 'Usuarios',
-                href: '/admin/users',
-                icon: Users,
-            },
-            {
-                title: 'Clientes',
-                href: '/admin/customers',
-                icon: ContactRound,
-            },
-        );
-    }
+    const granted = new Set(auth.user?.permissions ?? []);
+    const allowed = (items: GatedNavItem[]) =>
+        items.filter((item) => [item.permission].flat().some((p) => granted.has(p)));
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -79,7 +51,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard()} prefetch>
+                            <Link href="/panel" prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
@@ -88,7 +60,8 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={[...baseNavItems, ...extraNavItems]} />
+                <NavMain label="Mi trabajo" items={allowed(workItems)} />
+                <NavMain label="Administración" items={allowed(adminItems)} />
             </SidebarContent>
 
             <SidebarFooter>

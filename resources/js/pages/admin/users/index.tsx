@@ -1,22 +1,15 @@
-import { Head, router } from '@inertiajs/react';
-import { Form } from '@inertiajs/react';
+import { Form, Head, router } from '@inertiajs/react';
 import { useState } from 'react';
+import type { PermissionOption, UserItem } from '@/components/admin/users/types';
+import UserPermissionsDialog from '@/components/admin/users/user-permissions-dialog';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-type UserItem = {
-    id: number;
-    name: string;
-    email: string;
-    roles: Array<{ name: string }>;
-};
-
-interface PageProps {
+interface UsersIndexPageProps {
     users: {
         data: UserItem[];
         meta: {
@@ -28,11 +21,20 @@ interface PageProps {
         };
     };
     roles: string[];
+    permissionCatalog: PermissionOption[];
 }
 
-export default function UsersIndex({ users, roles }: PageProps) {
+const ROLE_LABEL: Record<string, string> = {
+    'super-admin': 'Super admin',
+    admin: 'Administrador',
+    employee: 'Barbero',
+    client: 'Cliente',
+};
+
+export default function UsersIndex({ users, roles, permissionCatalog }: UsersIndexPageProps) {
     const [showModal, setShowModal] = useState(false);
     const [editingUser, setEditingUser] = useState<UserItem | null>(null);
+    const [permissionsUser, setPermissionsUser] = useState<UserItem | null>(null);
 
     function openCreate() {
         setEditingUser(null);
@@ -57,37 +59,53 @@ export default function UsersIndex({ users, roles }: PageProps) {
 
     return (
         <>
-            <Head title="Usuarios" />
+            <Head title="Usuarios y permisos" />
 
-            <div className="flex h-full flex-1 flex-col gap-4 p-4">
-                <div className="flex items-center justify-between">
-                    <Heading title="Usuarios" description="Gestiona los usuarios y sus roles" />
-                    <Button onClick={openCreate}>Nuevo Usuario</Button>
+            <div className="flex h-full flex-1 flex-col gap-4 p-4 md:p-6">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                    <Heading title="Usuarios y permisos" description="Cada persona del equipo entra con su propia cuenta y ve solo lo que le permites." />
+                    <Button onClick={openCreate}>Nuevo usuario</Button>
                 </div>
 
-                <div className="overflow-x-auto rounded-xl border">
+                <div className="overflow-x-auto rounded-lg border bg-card">
                     <table className="w-full text-sm">
                         <thead>
-                            <tr className="border-b bg-muted/50">
+                            <tr className="border-b text-muted-foreground">
                                 <th className="px-4 py-3 text-left font-medium">Nombre</th>
-                                <th className="px-4 py-3 text-left font-medium">Email</th>
                                 <th className="px-4 py-3 text-left font-medium">Rol</th>
-                                <th className="px-4 py-3 text-right font-medium">Acciones</th>
+                                <th className="px-4 py-3 text-left font-medium">Permisos extra</th>
+                                <th className="px-4 py-3 text-right font-medium">
+                                    <span className="sr-only">Acciones</span>
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
                             {users.data.map((user) => (
                                 <tr key={user.id} className="border-b last:border-0">
-                                    <td className="px-4 py-3 font-medium">{user.name}</td>
-                                    <td className="px-4 py-3 text-muted-foreground">{user.email}</td>
                                     <td className="px-4 py-3">
-                                        {user.roles.map((r) => (
-                                            <Badge key={r.name} variant="secondary">{r.name}</Badge>
-                                        ))}
+                                        <p className="font-medium">{user.name}</p>
+                                        <p className="text-xs text-muted-foreground">{user.email}</p>
                                     </td>
-                                    <td className="px-4 py-3 text-right">
-                                        <Button variant="outline" size="sm" onClick={() => openEdit(user)}>Editar</Button>
-                                        <Button variant="destructive" size="sm" className="ml-2" onClick={() => deleteUser(user)}>Eliminar</Button>
+                                    <td className="px-4 py-3">
+                                        {user.role ? <Badge variant="secondary">{ROLE_LABEL[user.role] ?? user.role}</Badge> : <span className="text-muted-foreground">Sin rol</span>}
+                                    </td>
+                                    <td className="px-4 py-3 text-muted-foreground">
+                                        {user.is_super_admin ? 'Todos' : user.direct_permissions.length > 0 ? `${user.direct_permissions.length} asignado${user.direct_permissions.length > 1 ? 's' : ''}` : '—'}
+                                    </td>
+                                    <td className="px-4 py-3 text-right whitespace-nowrap">
+                                        {!user.is_super_admin && (
+                                            <Button variant="outline" size="sm" onClick={() => setPermissionsUser(user)}>
+                                                Permisos
+                                            </Button>
+                                        )}
+                                        <Button variant="ghost" size="sm" className="ml-1" onClick={() => openEdit(user)}>
+                                            Editar
+                                        </Button>
+                                        {!user.is_super_admin && (
+                                            <Button variant="ghost" size="sm" className="ml-1 text-destructive" onClick={() => deleteUser(user)}>
+                                                Eliminar
+                                            </Button>
+                                        )}
                                     </td>
                                 </tr>
                             ))}
@@ -102,16 +120,18 @@ export default function UsersIndex({ users, roles }: PageProps) {
                     </table>
                 </div>
 
-                {users.meta.total > 0 && (
+                {users.meta.last_page > 1 && (
                     <div className="flex items-center justify-between text-sm text-muted-foreground">
-                        <span>Mostrando {users.meta.from}-{users.meta.to} de {users.meta.total}</span>
-                        <div className="flex gap-2">
+                        <span>
+                            {users.meta.from}–{users.meta.to} de {users.meta.total}
+                        </span>
+                        <div className="flex gap-1">
                             {Array.from({ length: users.meta.last_page }, (_, i) => i + 1).map((page) => (
                                 <Button
                                     key={page}
                                     variant={page === users.meta.current_page ? 'default' : 'outline'}
                                     size="sm"
-                                    onClick={() => router.get(`/admin/users?page=${page}`)}
+                                    onClick={() => router.get('/admin/users', { page }, { preserveScroll: true })}
                                 >
                                     {page}
                                 </Button>
@@ -121,16 +141,19 @@ export default function UsersIndex({ users, roles }: PageProps) {
                 )}
             </div>
 
-            <Dialog open={showModal} onOpenChange={(open) => {
- if (!open) {
-closeModal();
-} 
-}}>
+            <Dialog
+                open={showModal}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        closeModal();
+                    }
+                }}
+            >
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>{editingUser ? 'Editar Usuario' : 'Nuevo Usuario'}</DialogTitle>
+                        <DialogTitle>{editingUser ? 'Editar usuario' : 'Nuevo usuario'}</DialogTitle>
                         <DialogDescription>
-                            {editingUser ? 'Actualiza los datos del usuario.' : 'Crea un nuevo usuario y asígnale un rol.'}
+                            {editingUser ? 'Actualiza los datos y el rol.' : 'El rol define lo básico; después puedes sumar permisos individuales.'}
                         </DialogDescription>
                     </DialogHeader>
 
@@ -143,52 +166,70 @@ closeModal();
                         {({ errors, processing }) => (
                             <div className="grid gap-4">
                                 <div className="grid gap-2">
-                                    <Label>Nombre</Label>
-                                    <Input name="name" defaultValue={editingUser?.name ?? ''} required />
+                                    <Label htmlFor="user-name">Nombre</Label>
+                                    <Input id="user-name" name="name" defaultValue={editingUser?.name ?? ''} required />
                                     {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label>Email</Label>
-                                    <Input name="email" type="email" defaultValue={editingUser?.email ?? ''} required />
+                                    <Label htmlFor="user-email">Correo</Label>
+                                    <Input id="user-email" name="email" type="email" defaultValue={editingUser?.email ?? ''} required />
                                     {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label>Rol</Label>
+                                    <Label htmlFor="user-role">Rol</Label>
                                     <select
+                                        id="user-role"
                                         name="role"
-                                        defaultValue={editingUser?.roles[0]?.name ?? ''}
-                                        className="border-input bg-background ring-offset-background flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden"
+                                        defaultValue={editingUser?.role ?? ''}
+                                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                                         required
                                     >
-                                        <option value="" disabled>Seleccionar rol</option>
+                                        <option value="" disabled>
+                                            Seleccionar rol
+                                        </option>
                                         {roles.map((r) => (
-                                            <option key={r} value={r}>{r}</option>
+                                            <option key={r} value={r}>
+                                                {ROLE_LABEL[r] ?? r}
+                                            </option>
                                         ))}
                                     </select>
                                     {errors.role && <p className="text-sm text-destructive">{errors.role}</p>}
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label>Contraseña {editingUser && '(dejar vacío para mantener)'}</Label>
-                                    <Input name="password" type="password" autoComplete="new-password" />
+                                    <Label htmlFor="user-password">Contraseña {editingUser && '(déjala vacía para mantenerla)'}</Label>
+                                    <Input id="user-password" name="password" type="password" autoComplete="new-password" />
                                     {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                                 </div>
 
                                 <div className="flex justify-end gap-2">
-                                    <Button type="button" variant="outline" onClick={closeModal}>Cancelar</Button>
-                                    <Button type="submit" disabled={processing}>Guardar</Button>
+                                    <Button type="button" variant="outline" onClick={closeModal}>
+                                        Cancelar
+                                    </Button>
+                                    <Button type="submit" disabled={processing}>
+                                        Guardar
+                                    </Button>
                                 </div>
                             </div>
                         )}
                     </Form>
                 </DialogContent>
             </Dialog>
+
+            {permissionsUser && (
+                <UserPermissionsDialog
+                    user={permissionsUser}
+                    catalog={permissionCatalog}
+                    roleLabel={permissionsUser.role ? (ROLE_LABEL[permissionsUser.role] ?? permissionsUser.role) : null}
+                    onClose={() => setPermissionsUser(null)}
+                />
+            )}
         </>
     );
 }
 
 UsersIndex.layout = {
-    breadcrumbs: [{ title: 'Usuarios', href: '/admin/users' }],
+    breadcrumbs: [{ title: 'Usuarios y permisos', href: '/admin/users' }],
 };

@@ -1,11 +1,13 @@
 <?php
 
+use App\Enums\Permission;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProductCategoryController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\UserPermissionController;
 use App\Http\Controllers\Api\AvailabilityController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\Auth\CustomerAuthController;
@@ -15,11 +17,13 @@ use App\Http\Controllers\Employee\AppointmentController as EmployeeAppointmentCo
 use App\Http\Controllers\Employee\ScheduleController;
 use App\Http\Controllers\Employee\ScheduleExceptionController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Professional\AgendaController as ProfessionalAgendaController;
 use App\Http\Controllers\WebhookController;
 use App\Models\Appointment;
 use App\Models\ProductCategory;
 use App\Models\Service;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Role;
@@ -68,30 +72,52 @@ Route::get('/', function () {
 
 Route::redirect('booking', '/')->name('booking');
 
-Route::redirect('/admin', '/admin/dashboard');
+// Cada usuario del personal entra a la sección que le corresponde según sus permisos.
+Route::get('panel', fn (Request $request) => redirect($request->user()->homeUrl()))->middleware('auth')->name('panel');
+Route::redirect('/admin', '/panel');
 
-Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::resource('services', ServiceController::class)->except(['show']);
-    Route::resource('products', ProductController::class)->except(['show']);
-    Route::post('product-categories', [ProductCategoryController::class, 'store'])->name('product-categories.store');
-    Route::delete('product-categories/{category}', [ProductCategoryController::class, 'destroy'])->name('product-categories.destroy');
-    Route::resource('users', UserController::class)->except(['show']);
-    Route::get('customers', [CustomerController::class, 'index'])->name('customers.index');
-    Route::delete('customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
+// Panel del personal: cada sección exige su propio permiso, sea por rol o asignado al usuario.
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard')->can(Permission::ViewDashboard->value);
+
+    Route::middleware('can:'.Permission::ManageServices->value)->group(function () {
+        Route::resource('services', ServiceController::class)->except(['show']);
+    });
+
+    Route::middleware('can:'.Permission::ManageProducts->value)->group(function () {
+        Route::resource('products', ProductController::class)->except(['show']);
+        Route::post('product-categories', [ProductCategoryController::class, 'store'])->name('product-categories.store');
+        Route::delete('product-categories/{category}', [ProductCategoryController::class, 'destroy'])->name('product-categories.destroy');
+    });
+
+    Route::middleware('can:'.Permission::ManageEmployees->value)->group(function () {
+        Route::resource('users', UserController::class)->except(['show']);
+        Route::put('users/{user}/permissions', [UserPermissionController::class, 'update'])->name('users.permissions.update');
+    });
+
+    Route::middleware('can:'.Permission::ManageCustomers->value)->group(function () {
+        Route::get('customers', [CustomerController::class, 'index'])->name('customers.index');
+        Route::delete('customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
+    });
 });
 
-Route::middleware(['auth', 'role:employee|admin|super-admin'])->prefix('employee')->name('employee.')->group(function () {
-    Route::get('appointments', [EmployeeAppointmentController::class, 'index'])->name('appointments.index');
+Route::middleware(['auth'])->prefix('employee')->name('employee.')->group(function () {
+    Route::get('appointments', [EmployeeAppointmentController::class, 'index'])->name('appointments.index')->can('viewAny', Appointment::class);
     Route::patch('appointments/{appointment}/status', [EmployeeAppointmentController::class, 'updateStatus'])->name('appointments.update-status');
 
-    Route::get('schedule', [ScheduleController::class, 'index'])->name('schedule.index');
-    Route::post('schedule', [ScheduleController::class, 'store'])->name('schedule.store');
-    Route::delete('schedule/{schedule}', [ScheduleController::class, 'destroy'])->name('schedule.destroy');
+    Route::middleware('can:'.Permission::ManageSchedule->value)->group(function () {
+        Route::get('schedule', [ScheduleController::class, 'index'])->name('schedule.index');
+        Route::post('schedule', [ScheduleController::class, 'store'])->name('schedule.store');
+        Route::delete('schedule/{schedule}', [ScheduleController::class, 'destroy'])->name('schedule.destroy');
 
-    Route::post('schedule-exceptions', [ScheduleExceptionController::class, 'store'])->name('schedule-exceptions.store');
-    Route::delete('schedule-exceptions/{exception}', [ScheduleExceptionController::class, 'destroy'])->name('schedule-exceptions.destroy');
+        Route::post('schedule-exceptions', [ScheduleExceptionController::class, 'store'])->name('schedule-exceptions.store');
+        Route::delete('schedule-exceptions/{exception}', [ScheduleExceptionController::class, 'destroy'])->name('schedule-exceptions.destroy');
+    });
 });
+
+Route::get('profesional', ProfessionalAgendaController::class)
+    ->middleware(['auth', 'can:'.Permission::ViewAppointments->value])
+    ->name('professional.agenda');
 
 Route::post('appointments', [AppointmentController::class, 'store'])->name('appointments.store');
 

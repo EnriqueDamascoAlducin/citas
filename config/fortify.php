@@ -143,7 +143,8 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // Las cuentas del personal las crea un administrador; los clientes se registran en /cliente/register.
+        // Features::registration(),
         Features::resetPasswords(),
         Features::emailVerification(),
     ],

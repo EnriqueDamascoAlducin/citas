@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\AppointmentStatus;
+use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -28,6 +31,22 @@ class Appointment extends Model
             'end_time' => 'datetime',
             'total_amount' => 'decimal:2',
         ];
+    }
+
+    public function scopeForEmployee(Builder $query, User|int $employee): void
+    {
+        $query->where('employee_id', $employee instanceof User ? $employee->id : $employee);
+    }
+
+    /** Citas que siguen ocupando la agenda (excluye canceladas y no asistió). */
+    public function scopeActive(Builder $query): void
+    {
+        $query->whereNotIn('status', [AppointmentStatus::Cancelled->value, AppointmentStatus::NoShow->value]);
+    }
+
+    public function scopeBetweenDates(Builder $query, CarbonInterface $from, CarbonInterface $to): void
+    {
+        $query->whereBetween('start_time', [$from->copy()->startOfDay(), $to->copy()->endOfDay()]);
     }
 
     public function client(): BelongsTo

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\Permission;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -44,7 +45,11 @@ class HandleInertiaRequests extends Middleware
                 'user' => $user ? [
                     ...$user->toArray(),
                     'roles' => $user->getRoleNames(),
-                    'permissions' => $user->getAllPermissions()->pluck('name'),
+                    // Permisos efectivos (rol + directos + super-admin vía Gate::before).
+                    'permissions' => collect(Permission::cases())
+                        ->filter(fn (Permission $permission) => $user->can($permission->value))
+                        ->map(fn (Permission $permission) => $permission->value)
+                        ->values(),
                 ] : null,
                 'customer' => $request->user('customer')?->toArray(),
             ],

@@ -61,8 +61,8 @@ params.employee_id = filterEmpId;
         router.patch(`/employee/appointments/${id}/status`, params);
     }
 
-    const statusLabel: Record<string, string> = { pending: 'Pendiente', confirmed: 'Confirmada', completed: 'Completada', cancelled: 'Cancelada' };
-    const statusVariant: Record<string, 'default' | 'secondary' | 'outline' | 'destructive'> = { pending: 'secondary', confirmed: 'default', completed: 'outline', cancelled: 'destructive' };
+    const statusLabel: Record<string, string> = { pending: 'Pendiente', confirmed: 'Confirmada', completed: 'Completada', cancelled: 'Cancelada', no_show: 'No asistió' };
+    const statusVariant: Record<string, 'default' | 'secondary' | 'outline' | 'destructive'> = { pending: 'secondary', confirmed: 'default', completed: 'outline', cancelled: 'destructive', no_show: 'destructive' };
 
     return (
         <>

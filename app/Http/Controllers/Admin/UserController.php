@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\Permission;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
 use App\Models\User;
@@ -15,15 +16,31 @@ class UserController extends Controller
 {
     public function index(Request $request): Response
     {
-        $users = User::with('roles')
+        $users = User::with(['roles.permissions', 'permissions'])
             ->orderBy('name')
-            ->paginate(15);
+            ->paginate(15)
+            ->through(fn (User $user) => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->roles->first()?->name,
+                'is_super_admin' => $user->hasRole('super-admin'),
+                'role_permissions' => $user->roles->flatMap->permissions->pluck('name')->unique()->values(),
+                'direct_permissions' => $user->permissions->pluck('name')->values(),
+            ]);
 
         $roles = Role::where('name', '!=', 'super-admin')->pluck('name');
+        $actor = $request->user();
 
         return Inertia::render('admin/users/index', [
             'users' => static::paginateResponse($users),
             'roles' => $roles,
+            'permissionCatalog' => collect(Permission::cases())->map(fn (Permission $p) => [
+                'name' => $p->value,
+                'label' => $p->label(),
+                'group' => $p->group(),
+                'grantable' => $actor->can($p->value),
+            ]),
         ]);
     }
 

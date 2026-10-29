@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\Permission as PermissionName;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
@@ -14,29 +15,16 @@ class RolePermissionSeeder extends Seeder
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $permissions = [
-            'view-appointments',
-            'create-appointments',
-            'cancel-appointments',
-            'view-any-appointment',
-            'manage-services',
-            'manage-products',
-            'manage-stock',
-            'manage-employees',
-            'manage-schedule',
-            'manage-roles',
-        ];
-
-        foreach ($permissions as $permission) {
+        foreach (PermissionName::values() as $permission) {
             Permission::findOrCreate($permission, 'web');
         }
 
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         $client = Role::findOrCreate('client', 'web');
-        $client->givePermissionTo([
+        // "view-appointments" es la agenda del barbero; el cliente ve las suyas en /my-appointments.
+        $client->syncPermissions([
             'create-appointments',
-            'view-appointments',
             'cancel-appointments',
         ]);
 
@@ -50,6 +38,8 @@ class RolePermissionSeeder extends Seeder
 
         $admin = Role::findOrCreate('admin', 'web');
         $admin->givePermissionTo([
+            'view-dashboard',
+            'manage-customers',
             'view-any-appointment',
             'view-appointments',
             'create-appointments',
