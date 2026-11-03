@@ -100,7 +100,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     Route::middleware('can:'.Permission::ManageCustomers->value)->group(function () {
         Route::get('customers', [CustomerController::class, 'index'])->name('customers.index');
-        Route::delete('customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
+        Route::put('customers/{customer}', [CustomerController::class, 'update'])->name('customers.update');
+        Route::delete('customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy')->can('delete', 'customer');
     });
 });
 

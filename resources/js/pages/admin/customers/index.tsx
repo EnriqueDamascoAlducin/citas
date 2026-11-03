@@ -1,10 +1,9 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
+import EditCustomerDialog from '@/components/admin/customers/edit-customer-dialog';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 
 type CustomerItem = {
     id: number;
@@ -26,10 +25,12 @@ interface PageProps {
             total: number;
         };
     };
+    canEdit: boolean;
 }
 
-export default function CustomersIndex({ customers }: PageProps) {
+export default function CustomersIndex({ customers, canEdit }: PageProps) {
     const [deleteTarget, setDeleteTarget] = useState<CustomerItem | null>(null);
+    const [editTarget, setEditTarget] = useState<CustomerItem | null>(null);
 
     function handleDelete(customer: CustomerItem) {
         router.delete(`/admin/customers/${customer.id}`, {
@@ -71,14 +72,19 @@ export default function CustomersIndex({ customers }: PageProps) {
                                     <td className="px-4 py-3 text-stone-400">{customer.email}</td>
                                     <td className="px-4 py-3 text-stone-400">{customer.phone || '—'}</td>
                                     <td className="px-4 py-3 text-stone-400">{new Date(customer.created_at).toLocaleDateString()}</td>
-                                    <td className="px-4 py-3 text-right">
-                                        <Button
-                                            variant="destructive"
-                                            size="sm"
-                                            onClick={() => setDeleteTarget(customer)}
-                                        >
-                                            Eliminar
-                                        </Button>
+                                    <td className="px-4 py-3 text-right whitespace-nowrap">
+                                        {canEdit ? (
+                                            <>
+                                                <Button variant="outline" size="sm" onClick={() => setEditTarget(customer)}>
+                                                    Editar
+                                                </Button>
+                                                <Button variant="destructive" size="sm" className="ml-2" onClick={() => setDeleteTarget(customer)}>
+                                                    Eliminar
+                                                </Button>
+                                            </>
+                                        ) : (
+                                            <span className="text-stone-600">—</span>
+                                        )}
                                     </td>
                                 </tr>
                             ))
@@ -120,7 +126,7 @@ export default function CustomersIndex({ customers }: PageProps) {
                     <DialogHeader>
                         <DialogTitle>Eliminar cliente</DialogTitle>
                         <DialogDescription>
-                            ¿Estás seguro de eliminar a <strong>{deleteTarget?.name}</strong>? También se eliminarán sus citas. Esta acción no se puede deshacer.
+                            ¿Estás seguro de eliminar a <strong>{deleteTarget?.name}</strong>? Ya no podrá entrar a su cuenta; sus citas pasadas se conservan en el historial. Esta acción no se puede deshacer.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="flex justify-end gap-2">
@@ -131,6 +137,8 @@ export default function CustomersIndex({ customers }: PageProps) {
                     </div>
                 </DialogContent>
             </Dialog>
+
+            {editTarget && <EditCustomerDialog customer={editTarget} onClose={() => setEditTarget(null)} />}
         </>
     );
 }

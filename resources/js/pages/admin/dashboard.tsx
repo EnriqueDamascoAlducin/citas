@@ -120,15 +120,15 @@ export default function AdminDashboard({ stats, appointments, appointments_by_da
                             {appointments_by_day.length > 0 ? (
                                 <ResponsiveContainer width="100%" height={250}>
                                     <BarChart data={appointments_by_day}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                                        <XAxis dataKey="date" tick={{ fontSize: 11 }} tickFormatter={(v) => v.slice(5)} stroke="hsl(var(--muted-foreground))" />
-                                        <YAxis allowDecimals={false} stroke="hsl(var(--muted-foreground))" />
+                                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                                        <XAxis dataKey="date" tick={{ fontSize: 11 }} tickFormatter={(v) => v.slice(5)} stroke="var(--muted-foreground)" />
+                                        <YAxis allowDecimals={false} stroke="var(--muted-foreground)" />
                                         <Tooltip
                                             labelFormatter={(v) => new Date(v + 'T00:00:00').toLocaleDateString('es-MX')}
                                             formatter={(value, name) => [value, 'Citas']}
-                                            contentStyle={{ background: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 13 }}
+                                            contentStyle={{ background: 'var(--popover)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13 }}
                                         />
-                                        <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                                        <Bar dataKey="count" fill="var(--primary)" radius={[4, 4, 0, 0]} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             ) : (
@@ -143,15 +143,15 @@ export default function AdminDashboard({ stats, appointments, appointments_by_da
                             {revenue_by_day.length > 0 ? (
                                 <ResponsiveContainer width="100%" height={250}>
                                     <AreaChart data={revenue_by_day}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                                        <XAxis dataKey="date" tick={{ fontSize: 11 }} tickFormatter={(v) => v.slice(5)} stroke="hsl(var(--muted-foreground))" />
-                                        <YAxis tickFormatter={(v) => `$${v}`} stroke="hsl(var(--muted-foreground))" />
+                                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                                        <XAxis dataKey="date" tick={{ fontSize: 11 }} tickFormatter={(v) => v.slice(5)} stroke="var(--muted-foreground)" />
+                                        <YAxis tickFormatter={(v) => `$${v}`} stroke="var(--muted-foreground)" />
                                         <Tooltip
                                             labelFormatter={(v) => new Date(v + 'T00:00:00').toLocaleDateString('es-MX')}
                                             formatter={(value, name) => [`$${Number(value).toFixed(2)}`, 'Ingresos']}
-                                            contentStyle={{ background: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 13 }}
+                                            contentStyle={{ background: 'var(--popover)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13 }}
                                         />
-                                        <Area type="monotone" dataKey="total" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.2)" strokeWidth={2} />
+                                        <Area type="monotone" dataKey="total" stroke="var(--primary)" fill="color-mix(in oklch, var(--primary) 20%, transparent)" strokeWidth={2} />
                                     </AreaChart>
                                 </ResponsiveContainer>
                             ) : (

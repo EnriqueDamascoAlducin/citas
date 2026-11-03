@@ -40,6 +40,7 @@ class RolePermissionSeeder extends Seeder
         $admin->givePermissionTo([
             'view-dashboard',
             'view-board',
+            'edit-customers',
             'manage-customers',
             'view-any-appointment',
             'view-appointments',
