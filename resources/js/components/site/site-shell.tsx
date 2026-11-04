@@ -1,4 +1,6 @@
 import { Link, router, usePage } from '@inertiajs/react';
+import { Menu, X } from 'lucide-react';
+import { useState } from 'react';
 import type { InputHTMLAttributes, ReactNode } from 'react';
 import { dashboard } from '@/routes/admin';
 
@@ -17,6 +19,8 @@ type Customer = { name: string } | null | undefined;
 
 export function SiteHeader({ logoImage, links }: { logoImage?: string; links?: Array<{ href: string; label: string }> }) {
     const { auth } = usePage().props as { auth: { user?: unknown; customer?: Customer } };
+    const [menuOpen, setMenuOpen] = useState(false);
+    const hasLinks = !!links?.length;
 
     return (
         <header className="border-b border-stone-800">
@@ -26,6 +30,7 @@ export function SiteHeader({ logoImage, links }: { logoImage?: string; links?: A
                 </Link>
 
                 <nav className="flex items-center gap-5 text-sm">
+
                     {links?.map((link) => (
                         <a key={link.href} href={link.href} className="hidden text-stone-400 transition-colors hover:text-stone-100 md:inline">
                             {link.label}
@@ -59,8 +64,42 @@ export function SiteHeader({ logoImage, links }: { logoImage?: string; links?: A
                             </Link>
                         </>
                     )}
+
+                    {hasLinks && (
+                        <button
+                            type="button"
+                            onClick={() => setMenuOpen((open) => !open)}
+                            aria-expanded={menuOpen}
+                            aria-controls="site-mobile-menu"
+                            aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
+                            className="-mr-2 cursor-pointer p-2 text-stone-300 hover:text-stone-100 md:hidden"
+                        >
+                            {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+                        </button>
+                    )}
                 </nav>
             </div>
+
+            {/* En celular las secciones van en un panel que se abre con el botón de menú. */}
+            {hasLinks && menuOpen && (
+                <nav id="site-mobile-menu" className="border-t border-stone-800 px-4 pb-4 md:hidden">
+                    {links!.map((link) => (
+                        <a
+                            key={link.href}
+                            href={link.href}
+                            onClick={() => setMenuOpen(false)}
+                            className="block border-b border-stone-800/60 py-3 text-base text-stone-200 hover:text-amber-400"
+                        >
+                            {link.label}
+                        </a>
+                    ))}
+                    {!auth.user && !auth.customer && (
+                        <Link href="/cliente/register" className="block py-3 text-base text-stone-200 hover:text-amber-400 sm:hidden">
+                            Crear cuenta
+                        </Link>
+                    )}
+                </nav>
+            )}
         </header>
     );
 }
