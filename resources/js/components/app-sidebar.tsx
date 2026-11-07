@@ -1,5 +1,20 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BarChart3, Calendar, CalendarCheck, CalendarDays, ContactRound, FolderGit2, MonitorPlay, Package, Scissors, Users } from 'lucide-react';
+import {
+    BarChart3,
+    Boxes,
+    Calendar,
+    CalendarCheck,
+    CalendarDays,
+    ContactRound,
+    FolderGit2,
+    MonitorPlay,
+    Package,
+    Receipt,
+    Scissors,
+    ShoppingCart,
+    TrendingUp,
+    Users,
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -20,6 +35,13 @@ type GatedNavItem = NavItem & { permission: string | string[] };
 const workItems: GatedNavItem[] = [
     { title: 'Mi agenda', href: '/profesional', icon: CalendarDays, permission: 'view-appointments' },
     { title: 'Mi horario', href: '/employee/schedule', icon: Calendar, permission: 'manage-schedule' },
+];
+
+const posItems: GatedNavItem[] = [
+    { title: 'Vender', href: '/pos', icon: ShoppingCart, permission: 'use-pos' },
+    { title: 'Ventas', href: '/pos/ventas', icon: Receipt, permission: ['use-pos', 'view-sales-reports'] },
+    { title: 'Inventario', href: '/pos/inventario', icon: Boxes, permission: 'manage-stock' },
+    { title: 'Reporte de ventas', href: '/pos/reportes', icon: TrendingUp, permission: 'view-sales-reports' },
 ];
 
 const adminItems: GatedNavItem[] = [
@@ -62,6 +84,7 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain label="Mi trabajo" items={allowed(workItems)} />
+                <NavMain label="Punto de venta" items={allowed(posItems)} />
                 <NavMain label="Administración" items={allowed(adminItems)} />
             </SidebarContent>
 

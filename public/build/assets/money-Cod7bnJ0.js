@@ -1,0 +1,1 @@
+var e=new Intl.NumberFormat(`es-MX`,{style:`currency`,currency:`MXN`});function t(t){return e.format(Number(t))}function n(e){return new Date(e).toLocaleString(`es-MX`,{day:`numeric`,month:`short`,hour:`2-digit`,minute:`2-digit`,hour12:!1})}export{n,t};

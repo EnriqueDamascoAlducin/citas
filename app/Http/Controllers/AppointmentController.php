@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\InventoryMovementType;
 use App\Http\Requests\StoreAppointmentRequest;
 use App\Models\Appointment;
 use App\Models\Product;
 use App\Models\Service;
 use App\Models\User;
 use App\Services\AvailabilityService;
+use App\Services\InventoryService;
 use App\Support\PhoneNumber;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -18,7 +20,7 @@ use Inertia\Inertia;
 
 class AppointmentController extends Controller
 {
-    public function store(StoreAppointmentRequest $request, AvailabilityService $availability): RedirectResponse
+    public function store(StoreAppointmentRequest $request, AvailabilityService $availability, InventoryService $inventory): RedirectResponse
     {
         if (! Auth::guard('customer')->check() && ! Auth::check()) {
             return to_route('customer.login');
@@ -44,7 +46,7 @@ class AppointmentController extends Controller
             $request->user('customer')->update(['phone' => PhoneNumber::normalize($request->phone)]);
         }
 
-        $appointment = DB::transaction(function () use ($request, $availability, $service, $date, $startTime, $endTime, $quantities, $isCustomer) {
+        $appointment = DB::transaction(function () use ($request, $availability, $inventory, $service, $date, $startTime, $endTime, $quantities, $isCustomer) {
             // Bloquea al empleado para que dos reservas simultáneas no tomen el mismo horario.
             $employee = User::role('employee')->lockForUpdate()->find($request->employee_id);
             if (! $employee) {
@@ -93,7 +95,7 @@ class AppointmentController extends Controller
                     'price' => $product->price,
                 ]);
 
-                $product->decrement('stock', $quantity);
+                $inventory->move($product, -$quantity, InventoryMovementType::OnlineOrder, null, $appointment);
             }
 
             return $appointment;

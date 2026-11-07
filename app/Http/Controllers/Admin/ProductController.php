@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProductRequest;
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Models\SaleItem;
+use App\Services\InventoryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -32,18 +35,26 @@ class ProductController extends Controller
         ]);
     }
 
-    public function store(StoreProductRequest $request): RedirectResponse
+    public function store(StoreProductRequest $request, InventoryService $inventory): RedirectResponse
     {
-        Product::create($request->validated());
+        DB::transaction(function () use ($request, $inventory) {
+            $product = Product::create([...$request->safe()->except('stock'), 'stock' => 0]);
+            // El stock inicial entra como movimiento para que el historial cuadre.
+            $inventory->setCount($product, (int) $request->validated('stock'), $request->user(), 'Alta del producto');
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Producto creado correctamente.']);
 
         return to_route('admin.products.index');
     }
 
-    public function update(StoreProductRequest $request, Product $product): RedirectResponse
+    public function update(StoreProductRequest $request, Product $product, InventoryService $inventory): RedirectResponse
     {
-        $product->update($request->validated());
+        DB::transaction(function () use ($request, $product, $inventory) {
+            $product = Product::whereKey($product->id)->lockForUpdate()->firstOrFail();
+            $product->update($request->safe()->except('stock'));
+            $inventory->setCount($product, (int) $request->validated('stock'), $request->user(), 'Editado desde Productos');
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Producto actualizado correctamente.']);
 
@@ -54,8 +65,8 @@ class ProductController extends Controller
     {
         abort_unless($request->user()->can('manage-products'), 403);
 
-        if ($product->appointments()->exists()) {
-            Inertia::flash('toast', ['type' => 'error', 'message' => 'El producto aparece en citas registradas. Desactívalo en lugar de eliminarlo.']);
+        if ($product->appointments()->exists() || SaleItem::where('product_id', $product->id)->exists()) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => 'El producto aparece en citas o ventas registradas. Desactívalo en lugar de eliminarlo.']);
 
             return to_route('admin.products.index');
         }

@@ -17,6 +17,10 @@ use App\Http\Controllers\Employee\AppointmentController as EmployeeAppointmentCo
 use App\Http\Controllers\Employee\ScheduleController;
 use App\Http\Controllers\Employee\ScheduleExceptionController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Pos\InventoryController;
+use App\Http\Controllers\Pos\PointOfSaleController;
+use App\Http\Controllers\Pos\SaleController;
+use App\Http\Controllers\Pos\SalesReportController;
 use App\Http\Controllers\Professional\AgendaController as ProfessionalAgendaController;
 use App\Http\Controllers\Professional\AppointmentBoardController;
 use App\Http\Controllers\WebhookController;
@@ -24,6 +28,7 @@ use App\Http\Controllers\Webhooks\TwilioWhatsAppController;
 use App\Http\Middleware\VerifyTwilioSignature;
 use App\Models\Appointment;
 use App\Models\ProductCategory;
+use App\Models\Sale;
 use App\Models\Service;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -127,6 +132,27 @@ Route::get('profesional', ProfessionalAgendaController::class)
 Route::get('tablero', AppointmentBoardController::class)
     ->middleware(['auth', 'can:'.Permission::ViewBoard->value])
     ->name('board');
+
+// Punto de venta en mostrador, inventario y reportes de ventas.
+Route::middleware('auth')->prefix('pos')->name('pos.')->group(function () {
+    Route::middleware('can:create,'.Sale::class)->group(function () {
+        Route::get('/', [PointOfSaleController::class, 'index'])->name('index');
+        Route::post('ventas', [PointOfSaleController::class, 'store'])->name('sales.store');
+    });
+
+    Route::get('ventas', [SaleController::class, 'index'])->name('sales.index')->can('viewAny', Sale::class);
+    Route::get('ventas/{sale}', [SaleController::class, 'show'])->name('sales.show');
+    Route::post('ventas/{sale}/cancelar', [SaleController::class, 'cancel'])->name('sales.cancel');
+
+    Route::middleware('can:'.Permission::ManageStock->value)->group(function () {
+        Route::get('inventario', [InventoryController::class, 'index'])->name('inventory.index');
+        Route::post('inventario/{product}/movimientos', [InventoryController::class, 'store'])->name('inventory.store');
+    });
+
+    Route::get('reportes', SalesReportController::class)
+        ->middleware('can:'.Permission::ViewSalesReports->value)
+        ->name('reports');
+});
 
 Route::post('appointments', [AppointmentController::class, 'store'])->name('appointments.store');
 

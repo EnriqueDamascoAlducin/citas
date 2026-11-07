@@ -34,10 +34,14 @@ class RolePermissionSeeder extends Seeder
             'create-appointments',
             'cancel-appointments',
             'manage-schedule',
+            'use-pos',
         ]);
 
         $admin = Role::findOrCreate('admin', 'web');
         $admin->givePermissionTo([
+            'use-pos',
+            'cancel-sales',
+            'view-sales-reports',
             'view-dashboard',
             'view-board',
             'edit-customers',
