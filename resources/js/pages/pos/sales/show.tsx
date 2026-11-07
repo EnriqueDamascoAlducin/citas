@@ -1,7 +1,8 @@
 import { Head, Link } from '@inertiajs/react';
-import { Printer } from 'lucide-react';
+import { Mail, Printer } from 'lucide-react';
 import { useState } from 'react';
 import CancelSaleDialog from '@/components/pos/cancel-sale-dialog';
+import EmailTicketDialog from '@/components/pos/email-ticket-dialog';
 import type { SaleData } from '@/components/pos/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,7 @@ interface SaleShowPageProps {
 
 export default function SaleShowPage({ sale }: SaleShowPageProps) {
     const [cancelling, setCancelling] = useState(false);
+    const [emailing, setEmailing] = useState(false);
     const cancelled = sale.status === 'cancelled';
 
     return (
@@ -26,9 +28,12 @@ export default function SaleShowPage({ sale }: SaleShowPageProps) {
                     <Button asChild>
                         <Link href="/pos">Nueva venta</Link>
                     </Button>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                         <Button variant="outline" onClick={() => window.print()}>
                             <Printer className="size-4" /> Imprimir
+                        </Button>
+                        <Button variant="outline" onClick={() => setEmailing(true)}>
+                            <Mail className="size-4" /> Enviar por correo
                         </Button>
                         {sale.can_cancel && (
                             <Button variant="outline" className="text-destructive" onClick={() => setCancelling(true)}>
@@ -37,6 +42,12 @@ export default function SaleShowPage({ sale }: SaleShowPageProps) {
                         )}
                     </div>
                 </div>
+
+                {sale.emailed_to && sale.emailed_at && (
+                    <p className="w-full max-w-md text-sm text-muted-foreground print:hidden">
+                        Enviado a {sale.emailed_to} el {new Date(sale.emailed_at).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' })}.
+                    </p>
+                )}
 
                 {/* Ticket; al imprimir solo sale esta parte. */}
                 <article className="w-full max-w-md rounded-lg border bg-card p-6 print:max-w-none print:border-0 print:p-0">
@@ -118,6 +129,7 @@ export default function SaleShowPage({ sale }: SaleShowPageProps) {
             </div>
 
             {cancelling && <CancelSaleDialog sale={sale} onClose={() => setCancelling(false)} />}
+            {emailing && <EmailTicketDialog sale={sale} onClose={() => setEmailing(false)} />}
         </>
     );
 }

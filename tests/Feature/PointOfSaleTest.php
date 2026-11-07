@@ -1,5 +1,6 @@
 <?php
 
+use App\Mail\SaleTicketMail;
 use App\Models\Appointment;
 use App\Models\InventoryMovement;
 use App\Models\Product;
@@ -7,6 +8,7 @@ use App\Models\Sale;
 use App\Models\Service;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Testing\AssertableInertia as Assert;
 
 beforeEach(function () {
@@ -107,6 +109,43 @@ describe('historial de ventas', function () {
 
         $this->actingAs(posUser('admin'))->get('/pos/ventas')
             ->assertInertia(fn (Assert $page) => $page->has('sales.data', 2)->where('summary.total', 300));
+    });
+});
+
+describe('enviar ticket por correo', function () {
+    test('manda el ticket y recuerda a quién se envió', function () {
+        Mail::fake();
+        $barber = posUser();
+        sell($barber, [['id' => $this->pomade->id, 'quantity' => 2]]);
+        $sale = Sale::sole();
+
+        $this->actingAs($barber)->post("/pos/ventas/{$sale->id}/correo", ['email' => 'ana@example.com'])->assertSessionHasNoErrors();
+
+        Mail::assertSent(SaleTicketMail::class, fn (SaleTicketMail $mail) => $mail->hasTo('ana@example.com') && $mail->sale->is($sale));
+        expect($sale->fresh())->emailed_to->toBe('ana@example.com')->emailed_at->not->toBeNull();
+    });
+
+    test('el correo lleva folio, productos y total', function () {
+        sell(posUser(), [['id' => $this->pomade->id, 'quantity' => 2]], ['cash_received' => 500]);
+        $sale = Sale::sole();
+
+        (new SaleTicketMail($sale))
+            ->assertHasSubject("Tu ticket de compra {$sale->folio()}")
+            ->assertSeeInHtml('Pomada')
+            ->assertSeeInHtml('$300.00')
+            ->assertSeeInHtml('$200.00');
+    });
+
+    test('valida el correo y no deja enviar ventas ajenas', function () {
+        Mail::fake();
+        $carlos = posUser();
+        sell($carlos, [['id' => $this->pomade->id, 'quantity' => 1]]);
+        $sale = Sale::sole();
+
+        $this->actingAs($carlos)->post("/pos/ventas/{$sale->id}/correo", ['email' => 'no-es-correo'])->assertSessionHasErrors('email');
+        $this->actingAs(posUser())->post("/pos/ventas/{$sale->id}/correo", ['email' => 'ana@example.com'])->assertForbidden();
+
+        Mail::assertNothingSent();
     });
 });
 

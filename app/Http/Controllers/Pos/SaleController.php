@@ -7,14 +7,19 @@ use App\Enums\Permission;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Pos\CancelSaleRequest;
 use App\Http\Requests\Pos\DateRangeRequest;
+use App\Http\Requests\Pos\SendSaleTicketRequest;
 use App\Http\Resources\SaleResource;
+use App\Mail\SaleTicketMail;
 use App\Models\Sale;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 /**
  * Historial de ventas de mostrador: las propias, o las de todos con el permiso de reportes.
@@ -66,6 +71,25 @@ class SaleController extends Controller
         return Inertia::render('pos/sales/show', [
             'sale' => (new SaleResource($sale))->resolve(),
         ]);
+    }
+
+    public function email(SendSaleTicketRequest $request, Sale $sale): RedirectResponse
+    {
+        $email = $request->validated('email');
+
+        try {
+            Mail::to($email)->send(new SaleTicketMail($sale));
+        } catch (Throwable $exception) {
+            report($exception);
+
+            throw ValidationException::withMessages(['email' => 'No se pudo enviar el correo. Revisa la dirección o la configuración de correo del sistema.']);
+        }
+
+        $sale->update(['emailed_to' => $email, 'emailed_at' => now()]);
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => "Ticket enviado a {$email}."]);
+
+        return back();
     }
 
     public function cancel(CancelSaleRequest $request, Sale $sale, CancelSale $cancelSale): RedirectResponse

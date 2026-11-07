@@ -31,6 +31,8 @@ class Sale extends Model
         'cancelled_at',
         'cancelled_by',
         'cancel_reason',
+        'emailed_to',
+        'emailed_at',
     ];
 
     protected function casts(): array
@@ -40,6 +42,7 @@ class Sale extends Model
             'total' => 'decimal:2',
             'cash_received' => 'decimal:2',
             'cancelled_at' => 'datetime',
+            'emailed_at' => 'datetime',
         ];
     }
 

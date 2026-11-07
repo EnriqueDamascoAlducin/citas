@@ -145,4 +145,24 @@
     body {
         @apply bg-background text-foreground;
     }
+
+    /* Listas nativas (select, calendario) con los colores del tema: sin esto, en
+       modo oscuro el navegador abre la lista blanca con el texto claro. */
+    :root {
+        color-scheme: light;
+    }
+
+    .dark {
+        color-scheme: dark;
+    }
+
+    select option,
+    select optgroup {
+        background-color: var(--popover);
+        color: var(--popover-foreground);
+    }
+
+    select option:disabled {
+        color: var(--muted-foreground);
+    }
 }

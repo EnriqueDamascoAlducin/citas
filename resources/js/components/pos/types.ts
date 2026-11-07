@@ -6,6 +6,9 @@ export type SaleData = {
     created_at: string;
     seller: string | null;
     customer: string | null;
+    customer_email: string | null;
+    emailed_to: string | null;
+    emailed_at: string | null;
     payment_method: { value: string; label: string };
     total: number;
     cash_received: number | null;

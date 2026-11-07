@@ -143,6 +143,7 @@ Route::middleware('auth')->prefix('pos')->name('pos.')->group(function () {
     Route::get('ventas', [SaleController::class, 'index'])->name('sales.index')->can('viewAny', Sale::class);
     Route::get('ventas/{sale}', [SaleController::class, 'show'])->name('sales.show');
     Route::post('ventas/{sale}/cancelar', [SaleController::class, 'cancel'])->name('sales.cancel');
+    Route::post('ventas/{sale}/correo', [SaleController::class, 'email'])->middleware('throttle:10,1')->name('sales.email');
 
     Route::middleware('can:'.Permission::ManageStock->value)->group(function () {
         Route::get('inventario', [InventoryController::class, 'index'])->name('inventory.index');
