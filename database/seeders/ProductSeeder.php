@@ -10,32 +10,24 @@ class ProductSeeder extends Seeder
 {
     public function run(): void
     {
-        $capilar = ProductCategory::where('name', 'Cuidado Capilar')->first();
-        $barba = ProductCategory::where('name', 'Barba y Bigote')->first();
-        $facial = ProductCategory::where('name', 'Cuidado Facial')->first();
-        $corporal = ProductCategory::where('name', 'Cuidado Corporal')->first();
-        $accesorios = ProductCategory::where('name', 'Accesorios')->first();
+        $cuidado = ProductCategory::where('name', 'Cuidado del Tatuaje')->first();
+        $proteccion = ProductCategory::where('name', 'Protección')->first();
+        $joyeria = ProductCategory::where('name', 'Joyería')->first();
+        $merch = ProductCategory::where('name', 'Merch')->first();
+        $regalo = ProductCategory::where('name', 'Tarjetas de Regalo')->first();
 
         $products = [
-            ['name' => 'Shampoo Profesional 300ml', 'description' => 'Shampoo neutro con biotina para uso diario.', 'price' => 180, 'stock' => 20, 'category_id' => $capilar->id],
-            ['name' => 'Acondicionador Profesional 300ml', 'description' => 'Acondicionador hidratante con keratina.', 'price' => 180, 'stock' => 15, 'category_id' => $capilar->id],
-            ['name' => 'Pomada para Cabello Fuerte', 'description' => 'Pomada con fijación extra para peinados clásicos.', 'price' => 220, 'stock' => 12, 'category_id' => $capilar->id],
-            ['name' => 'Cera Modeladora', 'description' => 'Cera con fijación media y acabado mate.', 'price' => 190, 'stock' => 10, 'category_id' => $capilar->id],
-            ['name' => 'Spray Fijador', 'description' => 'Spray de fijación fuerte con protección UV.', 'price' => 160, 'stock' => 8, 'category_id' => $capilar->id],
-            ['name' => 'Aceite para Barba 30ml', 'description' => 'Aceite hidratante con aroma a sándalo.', 'price' => 150, 'stock' => 25, 'category_id' => $barba->id],
-            ['name' => 'Bálsamo para Barba 50g', 'description' => 'Bálsamo acondicionador con manteca de karité.', 'price' => 170, 'stock' => 18, 'category_id' => $barba->id],
-            ['name' => 'Shampoo para Barba 200ml', 'description' => 'Shampoo suave especialmente formulado para barba.', 'price' => 140, 'stock' => 14, 'category_id' => $barba->id],
-            ['name' => 'Cera para Bigote', 'description' => 'Cera con fijación firme para modelar bigote.', 'price' => 130, 'stock' => 3, 'category_id' => $barba->id],
-            ['name' => 'Peine para Barba', 'description' => 'Peine de madera con cerdas mixtas.', 'price' => 90, 'stock' => 30, 'category_id' => $barba->id],
-            ['name' => 'Crema Hidratante Facial', 'description' => 'Crema ligera con ácido hialurónico.', 'price' => 200, 'stock' => 12, 'category_id' => $facial->id],
-            ['name' => 'Protector Solar SPF50', 'description' => 'Protector solar facial no graso.', 'price' => 250, 'stock' => 10, 'category_id' => $facial->id],
-            ['name' => 'Exfoliante Facial', 'description' => 'Exfoliante suave con partículas de jojoba.', 'price' => 160, 'stock' => 7, 'category_id' => $facial->id],
-            ['name' => 'Jabón Artesanal de Carbón', 'description' => 'Jabón desintoxicante con carbón activado.', 'price' => 80, 'stock' => 20, 'category_id' => $corporal->id],
-            ['name' => 'Desodorante Natural', 'description' => 'Desodorante sin alcohol ni aluminio.', 'price' => 110, 'stock' => 6, 'category_id' => $corporal->id],
-            ['name' => 'Navaja de Barbería', 'description' => 'Navaja clásica con hoja de acero inoxidable.', 'price' => 350, 'stock' => 5, 'category_id' => $accesorios->id],
-            ['name' => 'Cepillo para Cabello', 'description' => 'Cepillo de cerdas naturales con base de madera.', 'price' => 120, 'stock' => 15, 'category_id' => $accesorios->id],
-            ['name' => 'Peine de Bolsillo', 'description' => 'Peine plegable de acero inoxidable.', 'price' => 60, 'stock' => 4, 'category_id' => $accesorios->id],
-            ['name' => 'Toalla de Barbero', 'description' => 'Toalla de algodón 100% de alta absorción.', 'price' => 100, 'stock' => 25, 'category_id' => $accesorios->id],
+            ['name' => 'Crema Cicatrizante 50ml', 'description' => 'Crema con pantenol para las primeras semanas del tatuaje.', 'price' => 220, 'stock' => 25, 'category_id' => $cuidado->id],
+            ['name' => 'Bálsamo para Tatuaje 30g', 'description' => 'Bálsamo vegano que aviva el color del tatuaje.', 'price' => 180, 'stock' => 18, 'category_id' => $cuidado->id],
+            ['name' => 'Jabón Neutro Antibacterial', 'description' => 'Jabón sin aroma para lavar el tatuaje recién hecho.', 'price' => 90, 'stock' => 30, 'category_id' => $cuidado->id],
+            ['name' => 'Espuma Limpiadora', 'description' => 'Espuma suave para limpiar sin tallar.', 'price' => 160, 'stock' => 4, 'category_id' => $cuidado->id],
+            ['name' => 'Película Protectora (rollo)', 'description' => 'Película transpirable de segunda piel, 10 cm x 2 m.', 'price' => 250, 'stock' => 12, 'category_id' => $proteccion->id],
+            ['name' => 'Bloqueador para Tatuajes SPF50', 'description' => 'Protector en barra que evita que el tatuaje se desvanezca.', 'price' => 200, 'stock' => 10, 'category_id' => $proteccion->id],
+            ['name' => 'Arete de Titanio', 'description' => 'Arete de titanio grado implante para perforación nueva.', 'price' => 250, 'stock' => 20, 'category_id' => $joyeria->id],
+            ['name' => 'Septum de Acero Quirúrgico', 'description' => 'Herradura para septum, acero 316L.', 'price' => 180, 'stock' => 3, 'category_id' => $joyeria->id],
+            ['name' => 'Playera del Estudio', 'description' => 'Playera negra de algodón con el logo del estudio.', 'price' => 350, 'stock' => 15, 'category_id' => $merch->id],
+            ['name' => 'Gorra del Estudio', 'description' => 'Gorra snapback bordada.', 'price' => 300, 'stock' => 8, 'category_id' => $merch->id],
+            ['name' => 'Tarjeta de Regalo $1,000', 'description' => 'Certificado válido por 6 meses para cualquier servicio.', 'price' => 1000, 'stock' => 50, 'category_id' => $regalo->id],
         ];
 
         foreach ($products as $product) {

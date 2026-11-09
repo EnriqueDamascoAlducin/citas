@@ -19,7 +19,7 @@ test('el admin ve los roles sin el super admin', function () {
             ->has('roles', 3)
             ->where('roles.0.label', 'Administrador')
             ->where('roles.0.locked', true)
-            ->where('roles.1.label', 'Barbero'));
+            ->where('roles.1.label', 'Tatuador'));
 });
 
 test('crea un rol con permisos y se puede asignar a un usuario', function () {

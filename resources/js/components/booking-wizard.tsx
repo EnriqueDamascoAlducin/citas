@@ -4,6 +4,7 @@ import {
     Field,
     btnGhost,
     btnPrimary,
+    formatDuration,
     formatPrice,
     inputClass,
 } from '@/components/site/site-shell';
@@ -14,6 +15,7 @@ type Service = {
     description: string | null;
     duration_minutes: number;
     price: string | number;
+    deposit_amount: string | number;
 };
 
 type Employee = {
@@ -49,11 +51,33 @@ type Props = {
 
 const STEP_LABELS = [
     'Servicio',
-    'Barbero',
+    'Tatuador',
     'Fecha y hora',
     'Productos',
     'Confirmar',
 ];
+const BODY_ZONES = [
+    'Brazo',
+    'Antebrazo',
+    'Mano / dedos',
+    'Hombro',
+    'Pecho',
+    'Espalda',
+    'Costillas',
+    'Abdomen',
+    'Cuello',
+    'Pierna',
+    'Pantorrilla',
+    'Tobillo / pie',
+    'Otra',
+];
+const TATTOO_SIZES = [
+    { value: 'small', label: 'Pequeño (hasta 5 cm)' },
+    { value: 'medium', label: 'Mediano (5–15 cm)' },
+    { value: 'large', label: 'Grande (15–30 cm)' },
+    { value: 'xl', label: 'Muy grande (más de 30 cm)' },
+];
+const MAX_REFERENCE_MB = 5;
 const DAY_SHORT = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 const MONTH_SHORT = [
     'ene',
@@ -120,6 +144,13 @@ export default function BookingWizard({
         Record<number, number>
     >({});
     const [notes, setNotes] = useState('');
+    const [bodyZone, setBodyZone] = useState('');
+    const [tattooSize, setTattooSize] = useState('');
+    const [referenceImage, setReferenceImage] = useState<File | null>(null);
+    const [referencePreview, setReferencePreview] = useState<string | null>(
+        null,
+    );
+    const [ageConfirmed, setAgeConfirmed] = useState(false);
     const [phone, setPhone] = useState('');
     const [authTab, setAuthTab] = useState<'login' | 'register'>('login');
     const [loginForm, setLoginForm] = useState({ email: '', password: '' });
@@ -304,6 +335,35 @@ export default function BookingWizard({
         0,
     );
     const totalAmount = totalService + totalProducts;
+    const depositAmount = selectedService
+        ? Number(selectedService.deposit_amount ?? 0)
+        : 0;
+
+    useEffect(() => {
+        if (!referenceImage) {
+            setReferencePreview(null);
+
+            return;
+        }
+
+        const url = URL.createObjectURL(referenceImage);
+        setReferencePreview(url);
+
+        return () => URL.revokeObjectURL(url);
+    }, [referenceImage]);
+
+    function handleReferenceChange(file: File | null) {
+        if (file && file.size > MAX_REFERENCE_MB * 1024 * 1024) {
+            setError(
+                `La imagen de referencia no puede pesar más de ${MAX_REFERENCE_MB} MB.`,
+            );
+
+            return;
+        }
+
+        setError('');
+        setReferenceImage(file);
+    }
     const productCount = Object.values(selectedProducts).reduce(
         (a, b) => a + b,
         0,
@@ -312,6 +372,12 @@ export default function BookingWizard({
     const needsPhone = !!auth.customer && !auth.customer.phone;
 
     function handleConfirm() {
+        if (!ageConfirmed) {
+            setError('Confirma que eres mayor de 18 años.');
+
+            return;
+        }
+
         if (needsPhone && phone.trim() === '') {
             setError('Agrega tu teléfono para enviarte la confirmación de la cita.');
 
@@ -356,9 +422,15 @@ export default function BookingWizard({
                 end_time: selectedSlot.end_time,
                 products: productsPayload,
                 notes,
+                body_zone: bodyZone || null,
+                tattoo_size: tattooSize || null,
+                reference_image: referenceImage,
+                age_confirmed: ageConfirmed,
                 ...(needsPhone ? { phone } : {}),
             },
             {
+                // La foto de referencia viaja como multipart.
+                forceFormData: true,
                 preserveState: true,
                 preserveScroll: true,
                 onSuccess: () => {
@@ -419,7 +491,7 @@ export default function BookingWizard({
         value: string | null;
     }> = [
         { step: 1, label: 'Servicio', value: selectedService?.name ?? null },
-        { step: 2, label: 'Barbero', value: selectedEmployee?.name || null },
+        { step: 2, label: 'Tatuador', value: selectedEmployee?.name || null },
         {
             step: 3,
             label: 'Fecha y hora',
@@ -544,6 +616,16 @@ export default function BookingWizard({
                             {formatPrice(totalAmount)}
                         </span>
                     </div>
+                    {depositAmount > 0 && (
+                        <div className="mt-1 flex items-baseline justify-between">
+                            <span className="text-sm text-stone-500">
+                                Anticipo
+                            </span>
+                            <span className="text-sm text-stone-300 tabular-nums">
+                                {formatPrice(depositAmount)}
+                            </span>
+                        </div>
+                    )}
                 </div>
             </aside>
 
@@ -589,7 +671,12 @@ export default function BookingWizard({
                                             {service.name}
                                         </span>
                                         <span className="mt-0.5 block text-sm text-stone-400">
-                                            {service.duration_minutes} min
+                                            {formatDuration(
+                                                service.duration_minutes,
+                                            )}
+                                            {Number(service.deposit_amount) > 0
+                                                ? ` · anticipo ${formatPrice(service.deposit_amount)}`
+                                                : ''}
                                             {service.description
                                                 ? ` · ${service.description}`
                                                 : ''}
@@ -617,13 +704,13 @@ export default function BookingWizard({
                     <div>
                         {loading && (
                             <p className="text-stone-400">
-                                Buscando barberos disponibles…
+                                Buscando tatuadores disponibles…
                             </p>
                         )}
                         {!loading && employees.length === 0 && (
                             <div className="space-y-4">
                                 <p className="text-stone-400">
-                                    No hay barberos disponibles para este
+                                    No hay tatuadores disponibles para este
                                     servicio.
                                 </p>
                                 <button
@@ -914,7 +1001,7 @@ export default function BookingWizard({
                         <dl className="divide-y divide-stone-800 border-y border-stone-800 text-sm">
                             {[
                                 ['Servicio', selectedService?.name],
-                                ['Barbero', selectedEmployee?.name],
+                                ['Tatuador', selectedEmployee?.name],
                                 ['Fecha', formatLongDate(selectedDate)],
                                 ['Hora', selectedSlot?.display],
                             ].map(([label, value]) => (
@@ -948,19 +1035,139 @@ export default function BookingWizard({
                                     {formatPrice(totalAmount)}
                                 </dd>
                             </div>
+                            {depositAmount > 0 && (
+                                <div className="flex justify-between gap-4 py-3">
+                                    <dt className="text-stone-400">
+                                        Anticipo para apartar
+                                        <span className="block text-xs text-stone-500">
+                                            Se descuenta del total; el resto se
+                                            paga en el estudio.
+                                        </span>
+                                    </dt>
+                                    <dd className="font-semibold text-amber-500 tabular-nums">
+                                        {formatPrice(depositAmount)}
+                                    </dd>
+                                </div>
+                            )}
                         </dl>
 
-                        <label className="block">
-                            <span className="mb-1.5 block text-sm text-stone-300">
-                                Notas para el barbero (opcional)
-                            </span>
-                            <textarea
-                                rows={3}
-                                value={notes}
-                                onChange={(e) => setNotes(e.target.value)}
-                                className={`${inputClass} min-h-[80px]`}
-                                placeholder="Por ejemplo: degradado bajo, sin navaja"
+                        <fieldset className="space-y-4">
+                            <legend className="mb-3 text-xs tracking-wider text-stone-500 uppercase">
+                                Tu diseño
+                            </legend>
+
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                <label className="block">
+                                    <span className="mb-1.5 block text-sm text-stone-300">
+                                        Zona del cuerpo
+                                    </span>
+                                    <select
+                                        value={bodyZone}
+                                        onChange={(e) =>
+                                            setBodyZone(e.target.value)
+                                        }
+                                        className={`${inputClass} [color-scheme:dark]`}
+                                    >
+                                        <option value="">Aún no sé</option>
+                                        {BODY_ZONES.map((zone) => (
+                                            <option key={zone} value={zone}>
+                                                {zone}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
+                                <label className="block">
+                                    <span className="mb-1.5 block text-sm text-stone-300">
+                                        Tamaño aproximado
+                                    </span>
+                                    <select
+                                        value={tattooSize}
+                                        onChange={(e) =>
+                                            setTattooSize(e.target.value)
+                                        }
+                                        className={`${inputClass} [color-scheme:dark]`}
+                                    >
+                                        <option value="">Aún no sé</option>
+                                        {TATTOO_SIZES.map((size) => (
+                                            <option
+                                                key={size.value}
+                                                value={size.value}
+                                            >
+                                                {size.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
+                            </div>
+
+                            <label className="block">
+                                <span className="mb-1.5 block text-sm text-stone-300">
+                                    Describe tu idea (opcional)
+                                </span>
+                                <textarea
+                                    rows={3}
+                                    value={notes}
+                                    onChange={(e) => setNotes(e.target.value)}
+                                    className={`${inputClass} min-h-[80px]`}
+                                    placeholder="Por ejemplo: rosa en línea fina con el nombre de mi mamá, solo negro"
+                                />
+                            </label>
+
+                            <div>
+                                <span className="mb-1.5 block text-sm text-stone-300">
+                                    Foto de referencia (opcional)
+                                </span>
+                                {referencePreview ? (
+                                    <div className="flex items-end gap-4">
+                                        <img
+                                            src={referencePreview}
+                                            alt="Tu referencia"
+                                            className="h-28 w-28 rounded-sm border border-stone-700 object-cover"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                handleReferenceChange(null)
+                                            }
+                                            className="cursor-pointer text-sm text-stone-400 underline underline-offset-2 hover:text-stone-100"
+                                        >
+                                            Quitar
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <input
+                                        type="file"
+                                        accept="image/jpeg,image/png,image/webp"
+                                        onChange={(e) =>
+                                            handleReferenceChange(
+                                                e.target.files?.[0] ?? null,
+                                            )
+                                        }
+                                        className="block w-full cursor-pointer text-sm text-stone-400 file:mr-4 file:cursor-pointer file:rounded-sm file:border-0 file:bg-stone-800 file:px-4 file:py-2 file:text-stone-200 hover:file:bg-stone-700"
+                                    />
+                                )}
+                                <p className="mt-1.5 text-xs text-stone-500">
+                                    Boceto, foto de un diseño o de la zona.
+                                    JPG, PNG o WebP de hasta {MAX_REFERENCE_MB}{' '}
+                                    MB. Solo la ve tu tatuador.
+                                </p>
+                            </div>
+                        </fieldset>
+
+                        <label className="flex cursor-pointer items-start gap-3 text-sm text-stone-300">
+                            <input
+                                type="checkbox"
+                                checked={ageConfirmed}
+                                onChange={(e) =>
+                                    setAgeConfirmed(e.target.checked)
+                                }
+                                className="mt-0.5 size-4 accent-amber-500"
                             />
+                            <span>
+                                Confirmo que soy mayor de 18 años y que
+                                presentaré identificación oficial el día de mi
+                                cita.
+                            </span>
                         </label>
 
                         {needsPhone && (

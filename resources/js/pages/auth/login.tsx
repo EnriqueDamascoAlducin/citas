@@ -107,5 +107,5 @@ export default function Login({ status, canResetPassword }: Props) {
 
 Login.layout = {
     title: 'Acceso del personal',
-    description: 'Administradores y barberos. Tu cuenta la crea el administrador.',
+    description: 'Administradores y tatuadores. Tu cuenta la crea el administrador.',
 };

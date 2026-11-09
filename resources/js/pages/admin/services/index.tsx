@@ -76,7 +76,14 @@ export default function ServicesIndex({ services, filters }: ServicesPageProps) 
                                 <tr key={service.id} className="border-b last:border-0">
                                     <td className="px-4 py-3 font-medium">{service.name}</td>
                                     <td className="px-4 py-3 text-muted-foreground">{service.duration_minutes} min</td>
-                                    <td className="px-4 py-3">${Number(service.price).toFixed(2)}</td>
+                                    <td className="px-4 py-3">
+                                        ${Number(service.price).toFixed(2)}
+                                        {Number(service.deposit_amount) > 0 && (
+                                            <span className="block text-xs text-muted-foreground">
+                                                Anticipo ${Number(service.deposit_amount).toFixed(2)}
+                                            </span>
+                                        )}
+                                    </td>
                                     <td className="px-4 py-3">
                                         <Badge variant={service.active ? 'default' : 'secondary'}>
                                             {service.active ? 'Activo' : 'Inactivo'}
@@ -188,6 +195,20 @@ closeModal();
                                         />
                                         {errors.price && <p className="text-sm text-destructive">{errors.price}</p>}
                                     </div>
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="deposit_amount">Anticipo para apartar ($)</Label>
+                                    <Input
+                                        id="deposit_amount"
+                                        name="deposit_amount"
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        defaultValue={editingService?.deposit_amount ?? 0}
+                                    />
+                                    <p className="text-xs text-muted-foreground">Lo que el cliente paga en línea al agendar. Déjalo en 0 si no pides anticipo.</p>
+                                    {errors.deposit_amount && <p className="text-sm text-destructive">{errors.deposit_amount}</p>}
                                 </div>
 
                                 <div className="flex items-center gap-2">

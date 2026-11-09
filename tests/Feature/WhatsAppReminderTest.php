@@ -204,7 +204,7 @@ describe('tablero de recepción', function () {
                 ->component('board')
                 ->has('rows', 1)
                 ->where('rows.0.client', 'Ana L.')
-                ->where('rows.0.barber', 'Carlos Martínez')
+                ->where('rows.0.artist', 'Carlos Martínez')
                 ->where('rows.0.state', 'confirmed')
                 ->missing('rows.0.phone'));
     });

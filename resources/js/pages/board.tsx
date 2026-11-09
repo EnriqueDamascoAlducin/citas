@@ -9,7 +9,7 @@ type BoardRow = {
     time: string;
     client: string;
     service: string | null;
-    barber: string | null;
+    artist: string | null;
     state: BoardState;
 };
 
@@ -129,7 +129,7 @@ export default function BoardPage({ rows }: BoardPageProps) {
                 <span>Hora</span>
                 <span>Cliente</span>
                 <span>Servicio</span>
-                <span>Barbero</span>
+                <span>Tatuador</span>
                 <span>Estado</span>
             </div>
 
@@ -149,7 +149,7 @@ export default function BoardPage({ rows }: BoardPageProps) {
                                 <span className="font-display text-4xl font-semibold tabular-nums">{row.time}</span>
                                 <span className="truncate text-3xl font-semibold">{row.client}</span>
                                 <span className="truncate text-2xl text-stone-300">{row.service ?? '—'}</span>
-                                <span className="truncate text-2xl text-stone-300">{row.barber ?? '—'}</span>
+                                <span className="truncate text-2xl text-stone-300">{row.artist ?? '—'}</span>
                                 <span className={`inline-flex items-center gap-3 justify-self-start rounded-full px-5 py-2 text-xl font-semibold ${state.chip}`}>
                                     <span className={`size-2.5 rounded-full ${state.dot}`} />
                                     {state.label}

@@ -9,7 +9,7 @@ use RuntimeException;
 
 /**
  * Recordatorio de cita con el botón «Confirmar». La plantilla de Twilio recibe:
- * {{1}} nombre, {{2}} servicio, {{3}} barbero, {{4}} día y {{5}} hora.
+ * {{1}} nombre, {{2}} servicio, {{3}} tatuador, {{4}} día y {{5}} hora.
  */
 class AppointmentReminder
 {

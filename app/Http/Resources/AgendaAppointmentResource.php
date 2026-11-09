@@ -28,6 +28,10 @@ class AgendaAppointmentResource extends JsonResource
                 'email' => $client?->email,
             ],
             'notes' => $this->notes,
+            'body_zone' => $this->body_zone,
+            'tattoo_size' => $this->tattoo_size?->label(),
+            'reference_image_url' => $this->referenceImageUrl(),
+            'deposit_amount' => (float) $this->deposit_amount,
             'products' => $this->products->map(fn ($product) => [
                 'name' => $product->name,
                 'quantity' => $product->pivot->quantity,

@@ -8,6 +8,7 @@ export type Service = {
     description: string | null;
     duration_minutes: number;
     price: string | number;
+    deposit_amount: string | number;
     active: boolean;
     created_at: string;
     updated_at: string;

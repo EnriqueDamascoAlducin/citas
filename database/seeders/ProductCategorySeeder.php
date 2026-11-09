@@ -10,11 +10,11 @@ class ProductCategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            ['name' => 'Cuidado Capilar', 'description' => 'Shampoos, acondicionadores y tratamientos para el cabello.'],
-            ['name' => 'Barba y Bigote', 'description' => 'Aceites, bálsamos y ceras para barba.'],
-            ['name' => 'Cuidado Facial', 'description' => 'Cremas, serums y protectores solares.'],
-            ['name' => 'Cuidado Corporal', 'description' => 'Jabones, exfoliantes y desodorantes.'],
-            ['name' => 'Accesorios', 'description' => 'Peines, cepillos, navajas y accesorios de barbería.'],
+            ['name' => 'Cuidado del Tatuaje', 'description' => 'Cremas, bálsamos y jabones para la cicatrización.'],
+            ['name' => 'Protección', 'description' => 'Película protectora y bloqueador para tatuajes.'],
+            ['name' => 'Joyería', 'description' => 'Joyería de titanio y acero quirúrgico para perforaciones.'],
+            ['name' => 'Merch', 'description' => 'Playeras, gorras y accesorios del estudio.'],
+            ['name' => 'Tarjetas de Regalo', 'description' => 'Certificados para regalar una sesión.'],
         ];
 
         foreach ($categories as $category) {

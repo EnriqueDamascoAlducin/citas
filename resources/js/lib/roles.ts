@@ -2,7 +2,7 @@
 const SYSTEM_ROLE_LABEL: Record<string, string> = {
     'super-admin': 'Super admin',
     admin: 'Administrador',
-    employee: 'Barbero',
+    employee: 'Tatuador',
     client: 'Cliente',
 };
 

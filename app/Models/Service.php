@@ -12,6 +12,7 @@ class Service extends Model
         'description',
         'duration_minutes',
         'price',
+        'deposit_amount',
         'active',
     ];
 
@@ -19,6 +20,7 @@ class Service extends Model
     {
         return [
             'price' => 'decimal:2',
+            'deposit_amount' => 'decimal:2',
             'active' => 'boolean',
         ];
     }

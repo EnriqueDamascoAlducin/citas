@@ -52,6 +52,7 @@ function bookingPayload(array $overrides = []): array
         'start_time' => '10:00',
         'end_time' => '10:30',
         'products' => [],
+        'age_confirmed' => true,
         ...$overrides,
     ];
 }

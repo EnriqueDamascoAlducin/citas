@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\AppointmentStatus;
+use App\Enums\TattooSize;
 use App\Observers\AppointmentObserver;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -24,12 +25,20 @@ class Appointment extends Model
         'end_time',
         'status',
         'notes',
+        'body_zone',
+        'tattoo_size',
+        'reference_image_path',
         'total_amount',
+        'deposit_amount',
+        'age_confirmed_at',
         'reminder_sent_at',
         'reminder_message_sid',
         'reminder_error',
         'client_confirmed_at',
     ];
+
+    /** La ruta interna del archivo no sale al navegador; se usa referenceImageUrl(). */
+    protected $hidden = ['reference_image_path'];
 
     protected function casts(): array
     {
@@ -37,6 +46,9 @@ class Appointment extends Model
             'start_time' => 'datetime',
             'end_time' => 'datetime',
             'total_amount' => 'decimal:2',
+            'deposit_amount' => 'decimal:2',
+            'tattoo_size' => TattooSize::class,
+            'age_confirmed_at' => 'datetime',
             'reminder_sent_at' => 'datetime',
             'client_confirmed_at' => 'datetime',
         ];
@@ -48,6 +60,22 @@ class Appointment extends Model
         $query->whereIn('status', [AppointmentStatus::Pending->value, AppointmentStatus::Confirmed->value])
             ->whereNull('reminder_sent_at')
             ->whereBetween('start_time', [now(), now()->addMinutes($minutes)]);
+    }
+
+    /** Lo que se cobra en línea: el anticipo si el servicio lo pide, si no el total. */
+    public function amountDueOnline(): float
+    {
+        return (float) $this->deposit_amount > 0
+            ? (float) $this->deposit_amount
+            : (float) $this->total_amount;
+    }
+
+    /** Liga a la foto de referencia (archivo privado, solo personal autorizado o quien agendó). */
+    public function referenceImageUrl(): ?string
+    {
+        return $this->reference_image_path
+            ? route('appointments.reference-image', $this)
+            : null;
     }
 
     /** Quien agendó: cliente con cuenta o, si la hizo alguien del personal, ese usuario. */

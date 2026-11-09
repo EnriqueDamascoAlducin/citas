@@ -21,7 +21,14 @@ type Appointment = {
     payments: Array<{ id: number; status: string; amount: number }>;
 };
 
-export default function AppointmentShow({ appointment }: { appointment: Appointment }) {
+type TattooDetails = {
+    body_zone: string | null;
+    size: string | null;
+    reference_image_url: string | null;
+    deposit_amount: number;
+};
+
+export default function AppointmentShow({ appointment, tattoo }: { appointment: Appointment; tattoo: TattooDetails }) {
     const { post, processing } = useHttp({ appointment_id: appointment.id });
 
     function payWithMercadoPago() {
@@ -116,6 +123,24 @@ export default function AppointmentShow({ appointment }: { appointment: Appointm
                             <span className="font-semibold">${Number(appointment.total_amount).toFixed(2)}</span>
                         </div>
 
+                        {tattoo.deposit_amount > 0 && (
+                            <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">Anticipo para apartar</span>
+                                <span>${tattoo.deposit_amount.toFixed(2)}</span>
+                            </div>
+                        )}
+
+                        {(tattoo.body_zone || tattoo.size || tattoo.reference_image_url) && (
+                            <div className="space-y-2 border-t pt-3">
+                                <p className="text-sm font-medium text-muted-foreground">Tu diseño</p>
+                                {tattoo.body_zone && <p className="text-sm">Zona: {tattoo.body_zone}</p>}
+                                {tattoo.size && <p className="text-sm">Tamaño: {tattoo.size}</p>}
+                                {tattoo.reference_image_url && (
+                                    <img src={tattoo.reference_image_url} alt="Referencia del tatuaje" className="max-h-60 rounded-md border object-contain" />
+                                )}
+                            </div>
+                        )}
+
                         {appointment.notes && (
                             <div className="border-t pt-3">
                                 <span className="text-sm text-muted-foreground">Notas:</span>
@@ -128,7 +153,11 @@ export default function AppointmentShow({ appointment }: { appointment: Appointm
                 {appointment.status === 'pending' && (
                     <div className="mt-6 flex justify-center">
                         <Button onClick={payWithMercadoPago} disabled={processing} className="w-full max-w-xs">
-                            {processing ? 'Procesando...' : 'Pagar con Mercado Pago'}
+                            {processing
+                                ? 'Procesando...'
+                                : tattoo.deposit_amount > 0
+                                  ? `Pagar anticipo ($${tattoo.deposit_amount.toFixed(2)})`
+                                  : 'Pagar con Mercado Pago'}
                         </Button>
                     </div>
                 )}

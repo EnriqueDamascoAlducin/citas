@@ -22,7 +22,7 @@ return new class extends Migration
 
         Role::where('name', 'admin')->where('guard_name', 'web')->first()?->givePermissionTo(self::NEW_PERMISSIONS);
 
-        // "view-appointments" ahora abre la agenda del barbero; el cliente no lo necesita.
+        // "view-appointments" ahora abre la agenda del tatuador; el cliente no lo necesita.
         Role::where('name', 'client')->where('guard_name', 'web')->first()?->revokePermissionTo('view-appointments');
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();

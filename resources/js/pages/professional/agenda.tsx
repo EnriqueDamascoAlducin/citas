@@ -11,6 +11,10 @@ type AgendaAppointment = {
     duration_minutes: number | null;
     client: { name: string; phone: string | null; email: string | null };
     notes: string | null;
+    body_zone: string | null;
+    tattoo_size: string | null;
+    reference_image_url: string | null;
+    deposit_amount: number;
     products: Array<{ name: string; quantity: number }>;
     total_amount: number;
     is_paid: boolean;
@@ -202,7 +206,22 @@ export default function ProfessionalAgendaPage({ date, isToday, appointments, su
                                         {apt.products.length > 0 && (
                                             <p className="text-sm">Productos: {apt.products.map((p) => `${p.name} ×${p.quantity}`).join(', ')}</p>
                                         )}
-                                        {apt.notes && <p className="text-sm text-muted-foreground">Nota: “{apt.notes}”</p>}
+                                        {(apt.body_zone || apt.tattoo_size) && (
+                                            <p className="text-sm">
+                                                Diseño: {[apt.body_zone, apt.tattoo_size].filter(Boolean).join(' · ')}
+                                            </p>
+                                        )}
+                                        {apt.deposit_amount > 0 && <p className="text-sm text-muted-foreground">Anticipo: {money(apt.deposit_amount)}</p>}
+                                        {apt.notes && <p className="text-sm text-muted-foreground">Idea: “{apt.notes}”</p>}
+                                        {apt.reference_image_url && (
+                                            <a href={apt.reference_image_url} target="_blank" rel="noreferrer" className="mt-1 block w-fit">
+                                                <img
+                                                    src={apt.reference_image_url}
+                                                    alt={`Referencia de ${apt.client.name}`}
+                                                    className="h-24 w-24 rounded-md border object-cover hover:opacity-90"
+                                                />
+                                            </a>
+                                        )}
                                     </div>
 
                                     <div className="flex flex-wrap items-start gap-2 sm:flex-col sm:items-end">

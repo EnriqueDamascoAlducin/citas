@@ -6,7 +6,7 @@ use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
 /**
- * Permisos del punto de venta. Los barberos venden por rol; cancelar ventas y
+ * Permisos del punto de venta. Los tatuadores venden por rol; cancelar ventas y
  * ver reportes es del admin, y se puede sumar a otra persona desde Permisos.
  */
 return new class extends Migration

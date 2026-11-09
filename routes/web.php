@@ -161,6 +161,7 @@ Route::middleware('auth')->prefix('pos')->name('pos.')->group(function () {
 });
 
 Route::post('appointments', [AppointmentController::class, 'store'])->name('appointments.store');
+Route::get('appointments/{appointment}/referencia', [AppointmentController::class, 'referenceImage'])->name('appointments.reference-image');
 
 Route::post('payments/preference', [PaymentController::class, 'createPreference'])->name('payments.preference');
 
@@ -169,7 +170,15 @@ Route::post('process_payment', [PaymentController::class, 'processCardPayment'])
 Route::get('appointments/{appointment}', function (Appointment $appointment) {
     $appointment->load(['service', 'employee', 'products', 'payments']);
 
-    return Inertia::render('appointments/show', ['appointment' => $appointment]);
+    return Inertia::render('appointments/show', [
+        'appointment' => $appointment,
+        'tattoo' => [
+            'body_zone' => $appointment->body_zone,
+            'size' => $appointment->tattoo_size?->label(),
+            'reference_image_url' => $appointment->referenceImageUrl(),
+            'deposit_amount' => (float) $appointment->deposit_amount,
+        ],
+    ]);
 })->name('appointments.show');
 
 Route::middleware(['auth'])->group(function () {

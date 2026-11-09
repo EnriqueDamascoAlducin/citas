@@ -22,7 +22,7 @@ class RolePermissionSeeder extends Seeder
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         $client = Role::findOrCreate('client', 'web');
-        // "view-appointments" es la agenda del barbero; el cliente ve las suyas en /my-appointments.
+        // "view-appointments" es la agenda del tatuador; el cliente ve las suyas en /my-appointments.
         $client->syncPermissions([
             'create-appointments',
             'cancel-appointments',

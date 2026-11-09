@@ -149,6 +149,18 @@ export function SectionTitle({ title, aside }: { title: string; aside?: ReactNod
     );
 }
 
+/** 45 → "45 min", 120 → "2 h", 150 → "2 h 30 min". Las sesiones de tatuaje duran horas. */
+export function formatDuration(minutes: number): string {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+
+    if (h === 0) {
+        return `${m} min`;
+    }
+
+    return m === 0 ? `${h} h` : `${h} h ${m} min`;
+}
+
 export function formatPrice(value: string | number): string {
     return `$${Number(value).toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
 }

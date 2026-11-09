@@ -26,7 +26,7 @@ class BoardAppointmentResource extends JsonResource
             'time' => $this->start_time->format('H:i'),
             'client' => $this->publicName($this->booker()?->name),
             'service' => $this->service?->name,
-            'barber' => $this->employee?->name,
+            'artist' => $this->employee?->name,
             'state' => $this->state(),
         ];
     }

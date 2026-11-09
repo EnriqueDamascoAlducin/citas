@@ -5,6 +5,7 @@ import {
     SectionTitle,
     SiteLayout,
     btnPrimary,
+    formatDuration,
     formatPrice,
 } from '@/components/site/site-shell';
 
@@ -16,6 +17,7 @@ type Service = {
     description: string | null;
     duration_minutes: number;
     price: string | number;
+    deposit_amount: string | number;
 };
 
 type ScheduleSlot = {
@@ -44,8 +46,28 @@ type ProductCategory = {
 
 const NAV_LINKS = [
     { href: '#servicios', label: 'Servicios' },
-    { href: '#barberos', label: 'Barberos' },
+    { href: '#tatuadores', label: 'Tatuadores' },
+    { href: '#antes', label: 'Antes de tu cita' },
     { href: '#agendar', label: 'Agendar' },
+];
+
+const AFTER_BOOKING = [
+    {
+        title: 'Manda tu referencia',
+        text: 'Al agendar puedes subir una foto o boceto de tu idea, la zona del cuerpo y el tamaño aproximado. El tatuador la revisa antes de tu cita.',
+    },
+    {
+        title: 'Aparta con anticipo',
+        text: 'Los tatuajes se apartan con un anticipo que se descuenta del total el día de tu sesión.',
+    },
+    {
+        title: 'Mayores de 18 años',
+        text: 'Trae identificación oficial. No tatuamos a menores de edad.',
+    },
+    {
+        title: 'Llega preparado',
+        text: 'Come bien, hidrátate y evita alcohol 24 horas antes. Usa ropa cómoda que deje libre la zona a tatuar.',
+    },
 ];
 
 export default function Welcome() {
@@ -95,27 +117,28 @@ export default function Welcome() {
 
     return (
         <>
-            <Head title="Barbería" />
+            <Head title="Estudio de tatuajes" />
 
             <SiteLayout logoImage={logoImage} links={NAV_LINKS}>
                 {/* Portada */}
                 <section className="mx-auto max-w-6xl px-4 pt-12 pb-16 sm:px-6 lg:pt-16 lg:pb-20">
                     <p className="text-sm text-stone-400">
-                        Barbería profesional desde 2024
+                        Estudio de tatuajes y perforaciones
                     </p>
                     <div className="mt-4 grid gap-8 lg:grid-cols-[1.4fr_1fr] lg:items-end lg:gap-16">
                         <h1 className="font-display text-6xl leading-[0.9] font-bold uppercase sm:text-7xl lg:text-[7.5rem]">
-                            Estilo clásico,
+                            Tu idea,
                             <br />
                             <span className="text-amber-500">
-                                corte perfecto
+                                en tu piel
                             </span>
                         </h1>
                         <div className="lg:pb-3">
                             <p className="max-w-md text-lg leading-relaxed text-stone-300">
-                                Barbería tradicional con los mejores
-                                profesionales. Cortes modernos y clásicos,
-                                barba, y productos de cuidado personal.
+                                Tatuadores con estilo propio: línea fina,
+                                realismo, tradicional y blackwork. Diseño a tu
+                                medida, material estéril y cuidados para que
+                                cicatrice perfecto.
                             </p>
                             <div className="mt-8 flex flex-wrap items-center gap-6">
                                 <button
@@ -137,13 +160,13 @@ export default function Welcome() {
 
                     <img
                         src={heroImage}
-                        alt="Interior de la barbería"
+                        alt="Interior del estudio"
                         className="mt-12 aspect-[3/2] w-full rounded-sm object-cover"
                     />
 
                     <dl className="mt-8 grid grid-cols-3 text-sm">
                         <div>
-                            <dt className="text-stone-500">Barberos</dt>
+                            <dt className="text-stone-500">Tatuadores</dt>
                             <dd className="mt-1 font-medium">
                                 {employees.length}
                             </dd>
@@ -196,7 +219,12 @@ export default function Welcome() {
                                                 {service.description
                                                     ? `${service.description} · `
                                                     : ''}
-                                                {service.duration_minutes} min
+                                                {formatDuration(
+                                                    service.duration_minutes,
+                                                )}
+                                                {Number(service.deposit_amount) >
+                                                    0 &&
+                                                    ` · Anticipo ${formatPrice(service.deposit_amount)}`}
                                             </p>
                                             <button
                                                 type="button"
@@ -220,12 +248,12 @@ export default function Welcome() {
                 {/* Equipo */}
                 {employees.length > 0 && (
                     <section
-                        id="barberos"
+                        id="tatuadores"
                         className="scroll-mt-6 border-t border-stone-800"
                     >
                         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
                             <SectionTitle
-                                title="Barberos"
+                                title="Tatuadores"
                                 aside="Horarios de atención de cada uno"
                             />
 
@@ -240,7 +268,7 @@ export default function Welcome() {
                                                 {employee.name}
                                             </h3>
                                             <p className="text-sm text-stone-500">
-                                                Barbero
+                                                Tatuador
                                             </p>
                                         </div>
 
@@ -300,6 +328,36 @@ export default function Welcome() {
                         </div>
                     </section>
                 )}
+
+                {/* Antes de tu cita */}
+                <section
+                    id="antes"
+                    className="scroll-mt-6 border-t border-stone-800"
+                >
+                    <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
+                        <SectionTitle
+                            title="Antes de tu cita"
+                            aside="Lo que necesitas saber"
+                        />
+                        <ol className="mt-2 grid gap-x-16 gap-y-8 sm:grid-cols-2">
+                            {AFTER_BOOKING.map((item, i) => (
+                                <li key={item.title} className="flex gap-5">
+                                    <span className="font-display text-4xl font-semibold text-amber-500 tabular-nums">
+                                        {String(i + 1).padStart(2, '0')}
+                                    </span>
+                                    <div>
+                                        <h3 className="text-lg font-medium">
+                                            {item.title}
+                                        </h3>
+                                        <p className="mt-1 text-sm leading-relaxed text-stone-400">
+                                            {item.text}
+                                        </p>
+                                    </div>
+                                </li>
+                            ))}
+                        </ol>
+                    </div>
+                </section>
 
                 {/* Reserva */}
                 <section

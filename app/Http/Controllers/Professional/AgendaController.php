@@ -13,7 +13,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * Agenda del día del barbero que inició sesión.
+ * Agenda del día del tatuador que inició sesión.
  */
 class AgendaController extends Controller
 {

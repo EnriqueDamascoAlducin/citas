@@ -39,7 +39,18 @@ class PaymentController extends Controller
             ],
         ];
 
-        foreach ($appointment->products as $product) {
+        // Con anticipo solo se cobra el anticipo; el resto se liquida en el estudio.
+        $chargesDeposit = (float) $appointment->deposit_amount > 0;
+        if ($chargesDeposit) {
+            $items = [[
+                'title' => 'Anticipo — '.$appointment->service->name,
+                'quantity' => 1,
+                'unit_price' => (float) $appointment->deposit_amount,
+                'currency_id' => 'MXN',
+            ]];
+        }
+
+        foreach ($chargesDeposit ? [] : $appointment->products as $product) {
             $items[] = [
                 'title' => $product->name,
                 'quantity' => $product->pivot->quantity,
@@ -74,7 +85,7 @@ class PaymentController extends Controller
         $appointment->payments()->create([
             'mp_payment_id' => null,
             'status' => 'pending',
-            'amount' => $appointment->total_amount,
+            'amount' => $appointment->amountDueOnline(),
             'method' => 'mercadopago',
         ]);
 
@@ -107,7 +118,7 @@ class PaymentController extends Controller
         try {
             $client = new PaymentClient;
             $payment = $client->create([
-                'transaction_amount' => (float) $appointment->total_amount,
+                'transaction_amount' => $appointment->amountDueOnline(),
                 'token' => $request->token,
                 'description' => $appointment->service->name,
                 'installments' => (int) $request->installments,
@@ -133,7 +144,7 @@ class PaymentController extends Controller
             $appointment->payments()->create([
                 'mp_payment_id' => $payment->id,
                 'status' => $status,
-                'amount' => $appointment->total_amount,
+                'amount' => $appointment->amountDueOnline(),
                 'method' => 'mercadopago',
             ]);
 

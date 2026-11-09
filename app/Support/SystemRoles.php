@@ -12,14 +12,14 @@ final class SystemRoles
 
     public const ADMIN = 'admin';
 
-    /** Quien tiene este rol aparece como barbero en la reserva en línea. */
+    /** Quien tiene este rol aparece como tatuador en la reserva en línea. */
     public const EMPLOYEE = 'employee';
 
     public const CLIENT = 'client';
 
     public const LABELS = [
         self::ADMIN => 'Administrador',
-        self::EMPLOYEE => 'Barbero',
+        self::EMPLOYEE => 'Tatuador',
         self::CLIENT => 'Cliente',
         self::SUPER_ADMIN => 'Super admin',
     ];
