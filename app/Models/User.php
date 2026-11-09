@@ -37,6 +37,10 @@ class User extends Authenticatable
             $this->can(Permission::ViewDashboard->value) => route('admin.dashboard'),
             $this->can(Permission::ViewAppointments->value) => route('professional.agenda'),
             $this->can(Permission::ViewAnyAppointment->value) => route('employee.appointments.index'),
+            // Roles creados por el negocio, p. ej. un cajero que solo vende.
+            $this->can(Permission::UsePos->value) => route('pos.index'),
+            $this->can(Permission::ManageStock->value) => route('pos.inventory.index'),
+            $this->can(Permission::ManageCustomers->value) => route('admin.customers.index'),
             default => route('home'),
         };
     }

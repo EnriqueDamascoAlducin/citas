@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProductCategoryController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserPermissionController;
@@ -101,6 +102,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::middleware('can:'.Permission::ManageEmployees->value)->group(function () {
         Route::resource('users', UserController::class)->except(['show']);
         Route::put('users/{user}/permissions', [UserPermissionController::class, 'update'])->name('users.permissions.update');
+    });
+
+    Route::middleware('can:'.Permission::ManageRoles->value)->group(function () {
+        Route::resource('roles', RoleController::class)->only(['index', 'store', 'update', 'destroy']);
     });
 
     Route::middleware('can:'.Permission::ManageCustomers->value)->group(function () {

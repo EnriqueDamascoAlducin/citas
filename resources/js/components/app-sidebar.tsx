@@ -11,6 +11,7 @@ import {
     Package,
     Receipt,
     Scissors,
+    ShieldCheck,
     ShoppingCart,
     TrendingUp,
     Users,
@@ -51,6 +52,7 @@ const adminItems: GatedNavItem[] = [
     { title: 'Servicios', href: '/admin/services', icon: Scissors, permission: 'manage-services' },
     { title: 'Productos', href: '/admin/products', icon: Package, permission: 'manage-products' },
     { title: 'Usuarios y permisos', href: '/admin/users', icon: Users, permission: 'manage-employees' },
+    { title: 'Roles', href: '/admin/roles', icon: ShieldCheck, permission: 'manage-roles' },
     { title: 'Clientes', href: '/admin/customers', icon: ContactRound, permission: 'manage-customers' },
 ];
 

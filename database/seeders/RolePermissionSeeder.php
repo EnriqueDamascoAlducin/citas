@@ -54,6 +54,7 @@ class RolePermissionSeeder extends Seeder
             'manage-products',
             'manage-stock',
             'manage-employees',
+            'manage-roles',
             'manage-schedule',
         ]);
 

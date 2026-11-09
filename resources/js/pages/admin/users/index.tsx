@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { roleLabel } from '@/lib/roles';
 
 interface UsersIndexPageProps {
     users: {
@@ -23,13 +24,6 @@ interface UsersIndexPageProps {
     roles: string[];
     permissionCatalog: PermissionOption[];
 }
-
-const ROLE_LABEL: Record<string, string> = {
-    'super-admin': 'Super admin',
-    admin: 'Administrador',
-    employee: 'Barbero',
-    client: 'Cliente',
-};
 
 export default function UsersIndex({ users, roles, permissionCatalog }: UsersIndexPageProps) {
     const [showModal, setShowModal] = useState(false);
@@ -87,7 +81,7 @@ export default function UsersIndex({ users, roles, permissionCatalog }: UsersInd
                                         <p className="text-xs text-muted-foreground">{user.email}</p>
                                     </td>
                                     <td className="px-4 py-3">
-                                        {user.role ? <Badge variant="secondary">{ROLE_LABEL[user.role] ?? user.role}</Badge> : <span className="text-muted-foreground">Sin rol</span>}
+                                        {user.role ? <Badge variant="secondary">{roleLabel(user.role)}</Badge> : <span className="text-muted-foreground">Sin rol</span>}
                                     </td>
                                     <td className="px-4 py-3 text-muted-foreground">
                                         {user.is_super_admin ? 'Todos' : user.direct_permissions.length > 0 ? `${user.direct_permissions.length} asignado${user.direct_permissions.length > 1 ? 's' : ''}` : '—'}
@@ -191,7 +185,7 @@ export default function UsersIndex({ users, roles, permissionCatalog }: UsersInd
                                         </option>
                                         {roles.map((r) => (
                                             <option key={r} value={r}>
-                                                {ROLE_LABEL[r] ?? r}
+                                                {roleLabel(r)}
                                             </option>
                                         ))}
                                     </select>
@@ -222,7 +216,7 @@ export default function UsersIndex({ users, roles, permissionCatalog }: UsersInd
                 <UserPermissionsDialog
                     user={permissionsUser}
                     catalog={permissionCatalog}
-                    roleLabel={permissionsUser.role ? (ROLE_LABEL[permissionsUser.role] ?? permissionsUser.role) : null}
+                    roleLabel={permissionsUser.role ? roleLabel(permissionsUser.role) : null}
                     onClose={() => setPermissionsUser(null)}
                 />
             )}

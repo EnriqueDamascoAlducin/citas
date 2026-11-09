@@ -97,7 +97,10 @@ describe('gestión de permisos por usuario', function () {
     test('nadie otorga un permiso que no tiene', function () {
         $barber = staff('employee');
 
-        $this->actingAs(staff('admin'))
+        // Encargado que administra usuarios pero no roles.
+        $manager = staff('employee')->givePermissionTo('manage-employees');
+
+        $this->actingAs($manager)
             ->put(route('admin.users.permissions.update', $barber), ['permissions' => ['manage-roles']])
             ->assertSessionHasErrors('permissions.0');
 
