@@ -19,7 +19,7 @@ class CustomerDashboardController extends Controller
 
         return Inertia::render('customer/dashboard', [
             'appointments' => CustomerAppointmentResource::collection($appointments)->resolve(),
-            'logoImage' => asset('storage/images/logo.png'),
+            'logoImage' => asset('images/logo.svg'),
         ]);
     }
 }

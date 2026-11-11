@@ -74,8 +74,8 @@ Route::get('/', function () {
         'services' => $services,
         'productCategories' => $productCategories,
         'employees' => $employees,
-        'heroImage' => asset('storage/images/hero.png'),
-        'logoImage' => asset('storage/images/logo.png'),
+        'heroImage' => asset('images/hero.webp'),
+        'logoImage' => asset('images/logo.svg'),
     ]);
 })->name('home');
 

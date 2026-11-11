@@ -126,10 +126,10 @@ export default function Welcome() {
                         Estudio de tatuajes y perforaciones
                     </p>
                     <div className="mt-4 grid gap-8 lg:grid-cols-[1.4fr_1fr] lg:items-end lg:gap-16">
-                        <h1 className="font-display text-6xl leading-[0.9] font-bold uppercase sm:text-7xl lg:text-[7.5rem]">
+                        <h1 className="font-tattoo font-normal text-6xl leading-[0.95] sm:text-7xl lg:text-[7.5rem]">
                             Tu idea,
                             <br />
-                            <span className="text-amber-500">
+                            <span className="text-red-500">
                                 en tu piel
                             </span>
                         </h1>
@@ -150,7 +150,7 @@ export default function Welcome() {
                                 </button>
                                 <a
                                     href="#servicios"
-                                    className="text-sm text-stone-300 underline decoration-stone-600 underline-offset-4 hover:text-white hover:decoration-amber-500"
+                                    className="text-sm text-stone-300 underline decoration-stone-600 underline-offset-4 hover:text-white hover:decoration-red-600"
                                 >
                                     Ver precios
                                 </a>
@@ -160,7 +160,7 @@ export default function Welcome() {
 
                     <img
                         src={heroImage}
-                        alt="Interior del estudio"
+                        alt="Daga estilo tatuaje tradicional con listón"
                         className="mt-12 aspect-[3/2] w-full rounded-sm object-cover"
                     />
 
@@ -210,7 +210,7 @@ export default function Welcome() {
                                                 className="mb-1 flex-1 border-b border-dotted border-stone-600"
                                                 aria-hidden
                                             />
-                                            <span className="font-display text-2xl font-semibold text-amber-500">
+                                            <span className="font-display text-2xl font-semibold text-red-500">
                                                 {formatPrice(service.price)}
                                             </span>
                                         </div>
@@ -233,7 +233,7 @@ export default function Welcome() {
                                                         service.id,
                                                     )
                                                 }
-                                                className="shrink-0 cursor-pointer text-sm font-medium text-amber-500 hover:text-amber-400"
+                                                className="shrink-0 cursor-pointer text-sm font-medium text-red-500 hover:text-red-400"
                                             >
                                                 Agendar
                                             </button>
@@ -264,7 +264,7 @@ export default function Welcome() {
                                         className="grid gap-5 py-7 md:grid-cols-[220px_1fr_auto] md:items-start md:gap-10"
                                     >
                                         <div>
-                                            <h3 className="font-display text-2xl font-semibold tracking-wide uppercase">
+                                            <h3 className="font-tattoo font-normal text-3xl">
                                                 {employee.name}
                                             </h3>
                                             <p className="text-sm text-stone-500">
@@ -317,7 +317,7 @@ export default function Welcome() {
                                                     employee.id,
                                                 )
                                             }
-                                            className="cursor-pointer self-start text-left text-sm font-medium text-amber-500 hover:text-amber-400 md:text-right"
+                                            className="cursor-pointer self-start text-left text-sm font-medium text-red-500 hover:text-red-400 md:text-right"
                                         >
                                             Agendar con{' '}
                                             {employee.name.split(' ')[0]}
@@ -342,7 +342,7 @@ export default function Welcome() {
                         <ol className="mt-2 grid gap-x-16 gap-y-8 sm:grid-cols-2">
                             {AFTER_BOOKING.map((item, i) => (
                                 <li key={item.title} className="flex gap-5">
-                                    <span className="font-display text-4xl font-semibold text-amber-500 tabular-nums">
+                                    <span className="font-display text-4xl font-semibold text-red-500 tabular-nums">
                                         {String(i + 1).padStart(2, '0')}
                                     </span>
                                     <div>

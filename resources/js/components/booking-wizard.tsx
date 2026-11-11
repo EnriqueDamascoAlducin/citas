@@ -514,7 +514,7 @@ export default function BookingWizard({
     function choiceClass(selected: boolean): string {
         return `flex w-full cursor-pointer items-center justify-between gap-4 border-l-2 px-4 py-4 text-left transition-colors ${
             selected
-                ? 'border-amber-500 bg-stone-800'
+                ? 'border-red-600 bg-stone-800'
                 : 'border-transparent hover:bg-stone-800/60'
         }`;
     }
@@ -533,7 +533,7 @@ export default function BookingWizard({
                             onClick={() => setSelectedSlot(slot)}
                             className={`cursor-pointer rounded-sm border py-2 text-sm tabular-nums transition-colors ${
                                 selected
-                                    ? 'border-amber-500 bg-amber-500 font-semibold text-stone-950'
+                                    ? 'border-red-600 bg-red-600 font-semibold text-white'
                                     : 'border-stone-700 text-stone-200 hover:border-stone-500'
                             }`}
                         >
@@ -563,13 +563,13 @@ export default function BookingWizard({
                     {STEP_LABELS.map((_, i) => (
                         <span
                             key={i}
-                            className={`h-1 flex-1 ${i < step ? 'bg-amber-500' : 'bg-stone-800'}`}
+                            className={`h-1 flex-1 ${i < step ? 'bg-red-600' : 'bg-stone-800'}`}
                         />
                     ))}
                 </div>
 
                 <div className="hidden lg:block">
-                    <p className="font-display text-xl font-semibold tracking-wide uppercase">
+                    <p className="font-tattoo font-normal text-2xl">
                         Tu cita
                     </p>
                     <ol className="mt-4 border-t border-stone-800">
@@ -585,7 +585,7 @@ export default function BookingWizard({
                                 >
                                     <div className="flex items-baseline justify-between gap-3">
                                         <span
-                                            className={`text-xs tracking-wider uppercase ${isCurrent ? 'text-amber-500' : 'text-stone-500'}`}
+                                            className={`text-xs tracking-wider uppercase ${isCurrent ? 'text-red-500' : 'text-stone-500'}`}
                                         >
                                             {row.label}
                                         </span>
@@ -612,7 +612,7 @@ export default function BookingWizard({
                     </ol>
                     <div className="mt-4 flex items-baseline justify-between">
                         <span className="text-sm text-stone-400">Total</span>
-                        <span className="font-display text-3xl font-semibold text-amber-500">
+                        <span className="font-display text-3xl font-semibold text-red-500">
                             {formatPrice(totalAmount)}
                         </span>
                     </div>
@@ -637,7 +637,7 @@ export default function BookingWizard({
                             Paso {step} de 5
                         </p>
                     )}
-                    <h3 className="font-display text-3xl font-semibold tracking-wide uppercase">
+                    <h3 className="font-tattoo font-normal text-4xl">
                         {stepTitle}
                     </h3>
                 </div>
@@ -682,7 +682,7 @@ export default function BookingWizard({
                                                 : ''}
                                         </span>
                                     </span>
-                                    <span className="shrink-0 font-semibold text-amber-500">
+                                    <span className="shrink-0 font-semibold text-red-500">
                                         {formatPrice(service.price)}
                                     </span>
                                 </button>
@@ -692,7 +692,7 @@ export default function BookingWizard({
                             <button
                                 type="button"
                                 onClick={() => setShowAllServices(true)}
-                                className="mt-4 cursor-pointer text-sm text-amber-500 hover:text-amber-400"
+                                className="mt-4 cursor-pointer text-sm text-red-500 hover:text-red-400"
                             >
                                 Ver los {services.length} servicios
                             </button>
@@ -777,12 +777,12 @@ export default function BookingWizard({
                                             }
                                             className={`w-16 shrink-0 cursor-pointer rounded-sm border py-2 text-center transition-colors ${
                                                 selected
-                                                    ? 'border-amber-500 bg-amber-500 text-stone-950'
+                                                    ? 'border-red-600 bg-red-600 text-white'
                                                     : 'border-stone-700 hover:border-stone-500'
                                             }`}
                                         >
                                             <span
-                                                className={`block text-xs ${selected ? 'text-stone-900' : 'text-stone-500'}`}
+                                                className={`block text-xs ${selected ? 'text-red-100' : 'text-stone-500'}`}
                                             >
                                                 {i === 0
                                                     ? 'Hoy'
@@ -792,7 +792,7 @@ export default function BookingWizard({
                                                 {d}
                                             </span>
                                             <span
-                                                className={`block text-xs ${selected ? 'text-stone-900' : 'text-stone-500'}`}
+                                                className={`block text-xs ${selected ? 'text-red-100' : 'text-stone-500'}`}
                                             >
                                                 {MONTH_SHORT[m - 1]}
                                             </span>
@@ -915,7 +915,7 @@ export default function BookingWizard({
                                             return (
                                                 <li
                                                     key={product.id}
-                                                    className={`flex items-center justify-between gap-4 border-l-2 px-4 py-3 ${qty ? 'border-amber-500 bg-stone-800' : 'border-transparent'}`}
+                                                    className={`flex items-center justify-between gap-4 border-l-2 px-4 py-3 ${qty ? 'border-red-600 bg-stone-800' : 'border-transparent'}`}
                                                 >
                                                     <div className="min-w-0">
                                                         <p className="font-medium">
@@ -981,7 +981,7 @@ export default function BookingWizard({
                                                                     product.id,
                                                                 )
                                                             }
-                                                            className="shrink-0 cursor-pointer text-sm font-medium text-amber-500 hover:text-amber-400"
+                                                            className="shrink-0 cursor-pointer text-sm font-medium text-red-500 hover:text-red-400"
                                                         >
                                                             Agregar
                                                         </button>
@@ -1031,7 +1031,7 @@ export default function BookingWizard({
                             )}
                             <div className="flex items-baseline justify-between gap-4 py-4">
                                 <dt className="font-medium">Total</dt>
-                                <dd className="font-display text-3xl font-semibold text-amber-500">
+                                <dd className="font-display text-3xl font-semibold text-red-500">
                                     {formatPrice(totalAmount)}
                                 </dd>
                             </div>
@@ -1044,7 +1044,7 @@ export default function BookingWizard({
                                             paga en el estudio.
                                         </span>
                                     </dt>
-                                    <dd className="font-semibold text-amber-500 tabular-nums">
+                                    <dd className="font-semibold text-red-500 tabular-nums">
                                         {formatPrice(depositAmount)}
                                     </dd>
                                 </div>
@@ -1161,7 +1161,7 @@ export default function BookingWizard({
                                 onChange={(e) =>
                                     setAgeConfirmed(e.target.checked)
                                 }
-                                className="mt-0.5 size-4 accent-amber-500"
+                                className="mt-0.5 size-4 accent-red-600"
                             />
                             <span>
                                 Confirmo que soy mayor de 18 años y que
@@ -1224,7 +1224,7 @@ export default function BookingWizard({
                                     onClick={() => setAuthTab(tab)}
                                     className={`-mb-px cursor-pointer border-b-2 pb-3 text-sm font-medium transition-colors ${
                                         authTab === tab
-                                            ? 'border-amber-500 text-stone-100'
+                                            ? 'border-red-600 text-stone-100'
                                             : 'border-transparent text-stone-500 hover:text-stone-300'
                                     }`}
                                 >

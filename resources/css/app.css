@@ -13,9 +13,12 @@
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
 
-    /* Rótulos del sitio público: condensada, estilo letrero de barbería. */
+    /* Números y precios del sitio público: condensada. */
     --font-display:
         'Barlow Condensed', 'Arial Narrow', ui-sans-serif, system-ui, sans-serif;
+
+    /* Títulos del sitio público: letra gótica estilo tatuaje (la misma del logo). */
+    --font-tattoo: 'Pirata One', 'Barlow Condensed', ui-serif, Georgia, serif;
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);

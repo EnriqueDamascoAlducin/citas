@@ -4,16 +4,16 @@ import { useState } from 'react';
 import type { InputHTMLAttributes, ReactNode } from 'react';
 import { dashboard } from '@/routes/admin';
 
-const DEFAULT_LOGO = '/storage/images/logo.png';
+const DEFAULT_LOGO = '/images/logo.svg';
 
 export const btnPrimary =
-    'inline-flex items-center justify-center gap-2 rounded-sm bg-amber-500 px-5 py-2.5 text-sm font-semibold text-stone-950 transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer';
+    'inline-flex items-center justify-center gap-2 rounded-sm bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer';
 
 export const btnGhost =
     'inline-flex items-center justify-center gap-2 rounded-sm border border-stone-700 px-5 py-2.5 text-sm font-medium text-stone-200 transition-colors hover:border-stone-500 hover:text-white disabled:opacity-50 cursor-pointer';
 
 export const inputClass =
-    'block w-full rounded-sm border border-stone-700 bg-stone-950 px-3 py-2.5 text-sm text-stone-100 placeholder:text-stone-600 focus:border-amber-500 focus:outline-none';
+    'block w-full rounded-sm border border-stone-700 bg-stone-950 px-3 py-2.5 text-sm text-stone-100 placeholder:text-stone-600 focus:border-red-600 focus:outline-none';
 
 type Customer = { name: string } | null | undefined;
 
@@ -26,7 +26,7 @@ export function SiteHeader({ logoImage, links }: { logoImage?: string; links?: A
         <header className="border-b border-stone-800">
             <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-4 py-4 sm:px-6">
                 <Link href="/" className="shrink-0">
-                    <img src={logoImage || DEFAULT_LOGO} alt="Inicio" className="h-9 w-auto" />
+                    <img src={logoImage || DEFAULT_LOGO} alt="Inicio" className="h-11 w-auto" />
                 </Link>
 
                 <nav className="flex items-center gap-5 text-sm">
@@ -38,12 +38,12 @@ export function SiteHeader({ logoImage, links }: { logoImage?: string; links?: A
                     ))}
 
                     {auth.user ? (
-                        <Link href={dashboard()} className="text-stone-300 underline-offset-4 hover:text-amber-400 hover:underline">
+                        <Link href={dashboard()} className="text-stone-300 underline-offset-4 hover:text-red-400 hover:underline">
                             Panel
                         </Link>
                     ) : auth.customer ? (
                         <>
-                            <Link href="/mi-cuenta" className="text-stone-300 hover:text-amber-400">
+                            <Link href="/mi-cuenta" className="text-stone-300 hover:text-red-400">
                                 Mis citas
                             </Link>
                             <button
@@ -56,10 +56,10 @@ export function SiteHeader({ logoImage, links }: { logoImage?: string; links?: A
                         </>
                     ) : (
                         <>
-                            <Link href="/cliente/login" className="text-stone-300 hover:text-amber-400">
+                            <Link href="/cliente/login" className="text-stone-300 hover:text-red-400">
                                 Entrar
                             </Link>
-                            <Link href="/cliente/register" className="hidden text-stone-300 hover:text-amber-400 sm:inline">
+                            <Link href="/cliente/register" className="hidden text-stone-300 hover:text-red-400 sm:inline">
                                 Crear cuenta
                             </Link>
                         </>
@@ -88,13 +88,13 @@ export function SiteHeader({ logoImage, links }: { logoImage?: string; links?: A
                             key={link.href}
                             href={link.href}
                             onClick={() => setMenuOpen(false)}
-                            className="block border-b border-stone-800/60 py-3 text-base text-stone-200 hover:text-amber-400"
+                            className="block border-b border-stone-800/60 py-3 text-base text-stone-200 hover:text-red-400"
                         >
                             {link.label}
                         </a>
                     ))}
                     {!auth.user && !auth.customer && (
-                        <Link href="/cliente/register" className="block py-3 text-base text-stone-200 hover:text-amber-400 sm:hidden">
+                        <Link href="/cliente/register" className="block py-3 text-base text-stone-200 hover:text-red-400 sm:hidden">
                             Crear cuenta
                         </Link>
                     )}
@@ -143,7 +143,7 @@ export function Field({
 export function SectionTitle({ title, aside }: { title: string; aside?: ReactNode }) {
     return (
         <div className="flex flex-wrap items-end justify-between gap-4 border-b border-stone-800 pb-4">
-            <h2 className="font-display text-3xl font-semibold uppercase tracking-wide sm:text-4xl">{title}</h2>
+            <h2 className="font-tattoo font-normal text-4xl sm:text-5xl">{title}</h2>
             {aside && <div className="text-sm text-stone-400">{aside}</div>}
         </div>
     );

@@ -28,7 +28,7 @@ const COLUMNS = 'grid grid-cols-[8rem_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr
 
 const STATES: Record<BoardState, { label: string; chip: string; dot: string }> = {
     in_progress: { label: 'En el sillón', chip: 'bg-stone-100 text-stone-900', dot: 'bg-stone-900' },
-    next: { label: 'Siguiente', chip: 'bg-amber-500 text-stone-950', dot: 'bg-stone-950' },
+    next: { label: 'Siguiente', chip: 'bg-red-600 text-white', dot: 'bg-stone-950' },
     confirmed: { label: 'Confirmada', chip: 'bg-emerald-500/15 text-emerald-300', dot: 'bg-emerald-400' },
     scheduled: { label: 'Programada', chip: 'bg-stone-800 text-stone-300', dot: 'bg-stone-500' },
 };
@@ -104,14 +104,14 @@ export default function BoardPage({ rows }: BoardPageProps) {
 
             <header className="flex items-center justify-between border-b border-stone-800 px-12 py-6">
                 <div>
-                    <h1 className="font-display text-5xl font-semibold tracking-wide uppercase">Próximas citas</h1>
+                    <h1 className="font-tattoo font-normal text-6xl">Próximas citas</h1>
                     <p className="mt-1 text-xl text-stone-400 first-letter:uppercase">
                         {now.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })}
                     </p>
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <span className="font-display text-6xl font-semibold text-amber-500 tabular-nums">
+                    <span className="font-display text-6xl font-semibold text-red-500 tabular-nums">
                         {now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: false })}
                     </span>
                     <button
@@ -166,7 +166,7 @@ export default function BoardPage({ rows }: BoardPageProps) {
                 {pages > 1 && (
                     <div className="flex items-center gap-2">
                         {Array.from({ length: pages }, (_, index) => (
-                            <span key={index} className={`h-2.5 rounded-full transition-all ${index === page ? 'w-8 bg-amber-500' : 'w-2.5 bg-stone-700'}`} />
+                            <span key={index} className={`h-2.5 rounded-full transition-all ${index === page ? 'w-8 bg-red-600' : 'w-2.5 bg-stone-700'}`} />
                         ))}
                     </div>
                 )}

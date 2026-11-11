@@ -20,7 +20,7 @@ export default function CustomerRegister() {
             <Head title="Crear cuenta" />
             <SiteLayout>
                 <div className="mx-auto max-w-sm px-4 py-16 sm:py-24">
-                    <h1 className="font-display text-5xl font-bold uppercase">Crear cuenta</h1>
+                    <h1 className="font-tattoo font-normal text-6xl">Crear cuenta</h1>
                     <p className="mt-2 text-stone-400">Para agendar y pagar tus citas en línea.</p>
 
                     <form onSubmit={handleSubmit} className="mt-8 space-y-4">
@@ -46,7 +46,7 @@ export default function CustomerRegister() {
 
                     <p className="mt-8 border-t border-stone-800 pt-6 text-sm text-stone-400">
                         ¿Ya tienes cuenta?{' '}
-                        <Link href="/cliente/login" className="text-amber-500 hover:text-amber-400">
+                        <Link href="/cliente/login" className="text-red-500 hover:text-red-400">
                             Entra aquí
                         </Link>
                     </p>

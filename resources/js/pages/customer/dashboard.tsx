@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { SiteLayout, btnPrimary, formatPrice } from '@/components/site/site-shell';
 
 const STATUS: Record<string, { label: string; dot: string }> = {
-    pending: { label: 'Pendiente de pago', dot: 'bg-amber-500' },
+    pending: { label: 'Pendiente de pago', dot: 'bg-red-600' },
     confirmed: { label: 'Confirmada', dot: 'bg-emerald-500' },
     completed: { label: 'Completada', dot: 'bg-stone-500' },
     cancelled: { label: 'Cancelada', dot: 'bg-red-500' },
@@ -248,7 +248,7 @@ return;
                     <div className="flex flex-wrap items-end justify-between gap-4 border-b border-stone-800 pb-5">
                         <div>
                             {firstName && <p className="text-sm text-stone-400">Hola, {firstName}</p>}
-                            <h1 className="font-display text-5xl font-bold uppercase">Mis citas</h1>
+                            <h1 className="font-tattoo font-normal text-6xl">Mis citas</h1>
                         </div>
                         <Link href="/#agendar" className={btnPrimary}>
                             Nueva cita

@@ -18,6 +18,9 @@ export default defineConfig({
                 bunny('Barlow Condensed', {
                     weights: [500, 600, 700],
                 }),
+                bunny('Pirata One', {
+                    weights: [400],
+                }),
             ],
         }),
         inertia(),

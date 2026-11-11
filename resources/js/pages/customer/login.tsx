@@ -20,7 +20,7 @@ export default function CustomerLogin() {
             <Head title="Entrar" />
             <SiteLayout>
                 <div className="mx-auto max-w-sm px-4 py-16 sm:py-24">
-                    <h1 className="font-display text-5xl font-bold uppercase">Entrar</h1>
+                    <h1 className="font-tattoo font-normal text-6xl">Entrar</h1>
                     <p className="mt-2 text-stone-400">Consulta y paga tus citas.</p>
 
                     <form onSubmit={handleSubmit} className="mt-8 space-y-4">
@@ -47,7 +47,7 @@ export default function CustomerLogin() {
 
                     <p className="mt-8 border-t border-stone-800 pt-6 text-sm text-stone-400">
                         ¿Primera vez?{' '}
-                        <Link href="/cliente/register" className="text-amber-500 hover:text-amber-400">
+                        <Link href="/cliente/register" className="text-red-500 hover:text-red-400">
                             Crea tu cuenta
                         </Link>
                     </p>
