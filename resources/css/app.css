@@ -20,6 +20,22 @@
     /* Títulos del sitio público: letra gótica estilo tatuaje (la misma del logo). */
     --font-tattoo: 'Pirata One', 'Barlow Condensed', ui-serif, Georgia, serif;
 
+    /* Sitio público estilo hoja de flash: papel hueso y tinta negra. */
+    --color-paper: #efe7da;
+    --color-paper-dark: #e2d8c7;
+    --color-ink: #0c0a09;
+
+    --animate-marquee: marquee 40s linear infinite;
+
+    @keyframes marquee {
+        from {
+            transform: translateX(0);
+        }
+        to {
+            transform: translateX(-50%);
+        }
+    }
+
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
     --radius-sm: calc(var(--radius) - 4px);

@@ -1,15 +1,13 @@
 import { Head, usePage } from '@inertiajs/react';
 import { useCallback, useState } from 'react';
+import type { ReactNode } from 'react';
 import BookingWizard from '@/components/booking-wizard';
 import {
-    SectionTitle,
     SiteLayout,
     btnPrimary,
     formatDuration,
     formatPrice,
 } from '@/components/site/site-shell';
-
-const DAY_SHORT = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
 type Service = {
     id: number;
@@ -45,30 +43,110 @@ type ProductCategory = {
 };
 
 const NAV_LINKS = [
-    { href: '#servicios', label: 'Servicios' },
+    { href: '#catalogo', label: 'Catálogo' },
     { href: '#tatuadores', label: 'Tatuadores' },
     { href: '#antes', label: 'Antes de tu cita' },
     { href: '#agendar', label: 'Agendar' },
 ];
 
+const STYLES = [
+    'Línea fina',
+    'Realismo',
+    'Tradicional',
+    'Blackwork',
+    'Lettering',
+    'Neotradicional',
+    'Cover-up',
+    'Perforaciones',
+];
+
+// Lunes a domingo, con el número de día de Carbon (0 = domingo).
+const WEEK = [
+    { day: 1, short: 'L', long: 'Lunes' },
+    { day: 2, short: 'M', long: 'Martes' },
+    { day: 3, short: 'M', long: 'Miércoles' },
+    { day: 4, short: 'J', long: 'Jueves' },
+    { day: 5, short: 'V', long: 'Viernes' },
+    { day: 6, short: 'S', long: 'Sábado' },
+    { day: 0, short: 'D', long: 'Domingo' },
+];
+
 const AFTER_BOOKING = [
     {
         title: 'Manda tu referencia',
-        text: 'Al agendar puedes subir una foto o boceto de tu idea, la zona del cuerpo y el tamaño aproximado. El tatuador la revisa antes de tu cita.',
+        text: 'Sube una foto o boceto, la zona del cuerpo y el tamaño. Tu tatuador la revisa antes de la cita.',
     },
     {
         title: 'Aparta con anticipo',
-        text: 'Los tatuajes se apartan con un anticipo que se descuenta del total el día de tu sesión.',
+        text: 'El anticipo asegura tu lugar y se descuenta del total el día de tu sesión.',
     },
     {
-        title: 'Mayores de 18 años',
-        text: 'Trae identificación oficial. No tatuamos a menores de edad.',
+        title: 'Trae tu INE',
+        text: 'Solo tatuamos a mayores de 18 años con identificación oficial.',
     },
     {
         title: 'Llega preparado',
-        text: 'Come bien, hidrátate y evita alcohol 24 horas antes. Usa ropa cómoda que deje libre la zona a tatuar.',
+        text: 'Come bien, hidrátate, nada de alcohol 24 h antes y ropa que deje libre la zona.',
     },
 ];
+
+function initials(name: string): string {
+    return name
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase())
+        .join('');
+}
+
+function Ornament({ className = '' }: { className?: string }) {
+    return (
+        <span aria-hidden className={`select-none ${className}`}>
+            ✦
+        </span>
+    );
+}
+
+/** Título de sección centrado con adornos, en tono papel o tinta. */
+function SectionHeading({
+    eyebrow,
+    title,
+    tone,
+    children,
+}: {
+    eyebrow: string;
+    title: string;
+    tone: 'paper' | 'ink';
+    children?: ReactNode;
+}) {
+    const line = tone === 'paper' ? 'bg-ink/25' : 'bg-stone-700';
+
+    return (
+        <div className="mx-auto max-w-2xl text-center">
+            <p
+                className={`text-xs font-semibold tracking-[0.3em] uppercase ${tone === 'paper' ? 'text-red-700' : 'text-red-500'}`}
+            >
+                {eyebrow}
+            </p>
+            <div className="mt-3 flex items-center justify-center gap-4">
+                <span className={`hidden h-px w-16 sm:block ${line}`} />
+                <Ornament className="text-red-600" />
+                <h2 className="font-tattoo text-5xl leading-none sm:text-6xl">
+                    {title}
+                </h2>
+                <Ornament className="text-red-600" />
+                <span className={`hidden h-px w-16 sm:block ${line}`} />
+            </div>
+            {children && (
+                <p
+                    className={`mt-4 text-base ${tone === 'paper' ? 'text-stone-600' : 'text-stone-400'}`}
+                >
+                    {children}
+                </p>
+            )}
+        </div>
+    );
+}
 
 export default function Welcome() {
     const { services, employees, productCategories, heroImage, logoImage } =
@@ -120,195 +198,235 @@ export default function Welcome() {
             <Head title="Estudio de tatuajes" />
 
             <SiteLayout logoImage={logoImage} links={NAV_LINKS}>
-                {/* Portada */}
-                <section className="mx-auto max-w-6xl px-4 pt-12 pb-16 sm:px-6 lg:pt-16 lg:pb-20">
-                    <p className="text-sm text-stone-400">
-                        Estudio de tatuajes y perforaciones
-                    </p>
-                    <div className="mt-4 grid gap-8 lg:grid-cols-[1.4fr_1fr] lg:items-end lg:gap-16">
-                        <h1 className="font-tattoo font-normal text-6xl leading-[0.95] sm:text-7xl lg:text-[7.5rem]">
+                {/* Portada a pantalla completa con la ilustración de fondo */}
+                <section className="relative isolate flex min-h-[calc(100svh-77px)] flex-col overflow-hidden">
+                    <img
+                        src={heroImage}
+                        alt=""
+                        className="absolute inset-0 -z-20 h-full w-full object-cover opacity-60"
+                    />
+                    <div
+                        aria-hidden
+                        className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,rgba(12,10,9,0.55)_0%,rgba(12,10,9,0.92)_70%)]"
+                    />
+
+                    <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-center px-4 py-20 text-center sm:px-6">
+                        <p className="flex items-center gap-3 text-xs font-semibold tracking-[0.35em] text-stone-300 uppercase">
+                            <Ornament className="text-red-500" />
+                            Tatuajes · Perforaciones
+                            <Ornament className="text-red-500" />
+                        </p>
+                        <h1 className="mt-6 font-tattoo text-7xl leading-[0.9] drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)] sm:text-8xl lg:text-[9rem]">
                             Tu idea,
-                            <br />
-                            <span className="text-red-500">
+                            <span className="block text-red-500">
                                 en tu piel
                             </span>
                         </h1>
-                        <div className="lg:pb-3">
-                            <p className="max-w-md text-lg leading-relaxed text-stone-300">
-                                Tatuadores con estilo propio: línea fina,
-                                realismo, tradicional y blackwork. Diseño a tu
-                                medida, material estéril y cuidados para que
-                                cicatrice perfecto.
-                            </p>
-                            <div className="mt-8 flex flex-wrap items-center gap-6">
-                                <button
-                                    type="button"
-                                    onClick={scrollToBooking}
-                                    className={`${btnPrimary} px-7 py-3 text-base`}
-                                >
-                                    Agendar cita
-                                </button>
-                                <a
-                                    href="#servicios"
-                                    className="text-sm text-stone-300 underline decoration-stone-600 underline-offset-4 hover:text-white hover:decoration-red-600"
-                                >
-                                    Ver precios
-                                </a>
-                            </div>
+                        <p className="mt-6 max-w-xl text-lg leading-relaxed text-stone-200">
+                            Diseños a tu medida con tatuadores de estilo propio,
+                            material estéril y seguimiento hasta que cicatrice.
+                        </p>
+                        <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row">
+                            <button
+                                type="button"
+                                onClick={scrollToBooking}
+                                className={`${btnPrimary} px-9 py-3.5 text-base shadow-[4px_4px_0_0_#f5f5f4]`}
+                            >
+                                Agendar mi cita
+                            </button>
+                            <a
+                                href="#catalogo"
+                                className="inline-flex items-center justify-center rounded-sm border border-stone-300/60 px-9 py-3.5 text-base text-stone-100 transition-colors hover:border-white hover:bg-white/5"
+                            >
+                                Ver catálogo
+                            </a>
                         </div>
                     </div>
 
-                    <img
-                        src={heroImage}
-                        alt="Daga estilo tatuaje tradicional con listón"
-                        className="mt-12 aspect-[3/2] w-full rounded-sm object-cover"
-                    />
-
-                    <dl className="mt-8 grid grid-cols-3 text-sm">
-                        <div>
-                            <dt className="text-stone-500">Tatuadores</dt>
-                            <dd className="mt-1 font-medium">
-                                {employees.length}
-                            </dd>
+                    {/* Cinta de estilos */}
+                    <div className="overflow-hidden border-y-2 border-ink bg-red-600 py-3 text-white">
+                        <div className="flex w-max animate-marquee gap-8 motion-reduce:animate-none">
+                            {[...STYLES, ...STYLES].map((style, i) => (
+                                <span
+                                    key={i}
+                                    className="flex items-center gap-8 font-tattoo text-2xl whitespace-nowrap"
+                                    aria-hidden={i >= STYLES.length}
+                                >
+                                    {style}
+                                    <Ornament className="text-base text-ink" />
+                                </span>
+                            ))}
                         </div>
-                        <div className="border-l border-stone-800 pl-4">
-                            <dt className="text-stone-500">Horario</dt>
-                            <dd className="mt-1 font-medium">
-                                Lun–Sáb, 9:00–18:00
-                            </dd>
-                        </div>
-                        <div className="border-l border-stone-800 pl-4">
-                            <dt className="text-stone-500">Ubicación</dt>
-                            <dd className="mt-1 font-medium">Tu ciudad</dd>
-                        </div>
-                    </dl>
+                    </div>
                 </section>
 
-                {/* Servicios: lista de precios */}
+                {/* Catálogo: tarjetas tipo hoja de flash sobre papel */}
                 {services.length > 0 && (
                     <section
-                        id="servicios"
-                        className="scroll-mt-6 border-t border-stone-800 bg-stone-900"
+                        id="catalogo"
+                        className="scroll-mt-6 bg-paper text-ink"
                     >
-                        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
-                            <SectionTitle
-                                title="Servicios y precios"
-                                aside="Precios en MXN"
-                            />
+                        <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-24">
+                            <SectionHeading
+                                eyebrow="Precios en MXN"
+                                title="Catálogo"
+                                tone="paper"
+                            >
+                                El precio final lo confirma tu tatuador según
+                                tamaño, detalle y zona.
+                            </SectionHeading>
 
-                            <ul className="mt-2 grid gap-x-16 lg:grid-cols-2">
-                                {services.map((service) => (
-                                    <li
-                                        key={service.id}
-                                        className="border-b border-stone-800 py-5"
-                                    >
-                                        <div className="flex items-baseline gap-3">
-                                            <h3 className="text-lg font-medium">
+                            <ul className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                                {services.map((service, i) => {
+                                    const deposit = Number(
+                                        service.deposit_amount,
+                                    );
+
+                                    return (
+                                        <li
+                                            key={service.id}
+                                            className="group flex flex-col border-2 border-ink bg-paper p-6 shadow-[6px_6px_0_0_#0c0a09] transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[8px_8px_0_0_#dc2626]"
+                                        >
+                                            <div className="flex items-center justify-between text-xs font-semibold tracking-[0.2em] text-stone-500 uppercase">
+                                                <span>
+                                                    Nº{' '}
+                                                    {String(i + 1).padStart(
+                                                        2,
+                                                        '0',
+                                                    )}
+                                                </span>
+                                                <span>
+                                                    {formatDuration(
+                                                        service.duration_minutes,
+                                                    )}
+                                                </span>
+                                            </div>
+                                            <h3 className="mt-4 font-tattoo text-4xl leading-none">
                                                 {service.name}
                                             </h3>
-                                            <span
-                                                className="mb-1 flex-1 border-b border-dotted border-stone-600"
-                                                aria-hidden
-                                            />
-                                            <span className="font-display text-2xl font-semibold text-red-500">
-                                                {formatPrice(service.price)}
-                                            </span>
-                                        </div>
-                                        <div className="mt-1.5 flex items-start justify-between gap-6">
-                                            <p className="text-sm text-stone-400">
-                                                {service.description
-                                                    ? `${service.description} · `
-                                                    : ''}
-                                                {formatDuration(
-                                                    service.duration_minutes,
-                                                )}
-                                                {Number(service.deposit_amount) >
-                                                    0 &&
-                                                    ` · Anticipo ${formatPrice(service.deposit_amount)}`}
-                                            </p>
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    handlePreselectService(
-                                                        service.id,
-                                                    )
-                                                }
-                                                className="shrink-0 cursor-pointer text-sm font-medium text-red-500 hover:text-red-400"
-                                            >
-                                                Agendar
-                                            </button>
-                                        </div>
-                                    </li>
-                                ))}
+                                            {service.description && (
+                                                <p className="mt-3 flex-1 text-sm leading-relaxed text-stone-600">
+                                                    {service.description}
+                                                </p>
+                                            )}
+                                            <div className="mt-6 flex items-end justify-between gap-4 border-t-2 border-dashed border-ink/30 pt-4">
+                                                <div>
+                                                    <p className="font-display text-4xl leading-none font-bold">
+                                                        {Number(
+                                                            service.price,
+                                                        ) === 0
+                                                            ? 'Gratis'
+                                                            : formatPrice(
+                                                                  service.price,
+                                                              )}
+                                                    </p>
+                                                    <p className="mt-1 text-xs text-stone-600">
+                                                        {deposit > 0
+                                                            ? `Apartas con ${formatPrice(deposit)}`
+                                                            : 'Sin anticipo'}
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        handlePreselectService(
+                                                            service.id,
+                                                        )
+                                                    }
+                                                    className="shrink-0 cursor-pointer rounded-sm bg-ink px-4 py-2 text-sm font-semibold text-paper transition-colors group-hover:bg-red-600 group-hover:text-white"
+                                                >
+                                                    Lo quiero
+                                                </button>
+                                            </div>
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         </div>
                     </section>
                 )}
 
-                {/* Equipo */}
+                {/* Tatuadores: insignias sobre tinta */}
                 {employees.length > 0 && (
                     <section
                         id="tatuadores"
-                        className="scroll-mt-6 border-t border-stone-800"
+                        className="scroll-mt-6 border-t-2 border-ink bg-ink"
                     >
-                        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
-                            <SectionTitle
+                        <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-24">
+                            <SectionHeading
+                                eyebrow="El equipo"
                                 title="Tatuadores"
-                                aside="Horarios de atención de cada uno"
-                            />
+                                tone="ink"
+                            >
+                                Elige con quién tatuarte. Los días marcados en
+                                rojo son los que atiende.
+                            </SectionHeading>
 
-                            <ul className="divide-y divide-stone-800">
+                            <ul className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                                 {employees.map((employee) => (
                                     <li
                                         key={employee.id}
-                                        className="grid gap-5 py-7 md:grid-cols-[220px_1fr_auto] md:items-start md:gap-10"
+                                        className="flex flex-col items-center border border-stone-800 bg-stone-900/60 px-6 py-8 text-center"
                                     >
-                                        <div>
-                                            <h3 className="font-tattoo font-normal text-3xl">
-                                                {employee.name}
-                                            </h3>
-                                            <p className="text-sm text-stone-500">
-                                                Tatuador
-                                            </p>
+                                        <div className="relative grid size-28 place-items-center rounded-full border-2 border-stone-200">
+                                            <span
+                                                aria-hidden
+                                                className="absolute inset-2 rounded-full border-2 border-dashed border-red-600/80"
+                                            />
+                                            <span className="font-tattoo text-5xl text-stone-100">
+                                                {initials(employee.name)}
+                                            </span>
                                         </div>
+                                        <h3 className="mt-5 font-tattoo text-4xl leading-none">
+                                            {employee.name}
+                                        </h3>
+                                        <p className="mt-1 text-xs font-semibold tracking-[0.25em] text-stone-500 uppercase">
+                                            Tatuador
+                                        </p>
 
-                                        <dl className="grid grid-cols-2 gap-x-8 gap-y-1.5 text-sm sm:grid-cols-3">
-                                            {[1, 2, 3, 4, 5, 6].map((day) => {
+                                        <ul
+                                            className="mt-5 flex gap-1.5"
+                                            aria-label="Días de atención"
+                                        >
+                                            {WEEK.map(({ day, short, long }) => {
                                                 const slots =
                                                     employee.schedules[
                                                         String(day)
                                                     ] ?? [];
+                                                const works = slots.length > 0;
+                                                const hours = slots
+                                                    .map(
+                                                        (s) =>
+                                                            `${s.start_time}–${s.end_time}`,
+                                                    )
+                                                    .join(', ');
 
                                                 return (
-                                                    <div
+                                                    <li
                                                         key={day}
-                                                        className="flex gap-3"
+                                                        title={
+                                                            works
+                                                                ? `${long}: ${hours}`
+                                                                : `${long}: descansa`
+                                                        }
+                                                        className={`grid size-8 place-items-center rounded-full text-xs font-semibold ${
+                                                            works
+                                                                ? 'bg-red-600 text-white'
+                                                                : 'border border-stone-700 text-stone-600'
+                                                        }`}
                                                     >
-                                                        <dt className="w-9 text-stone-500">
-                                                            {DAY_SHORT[day]}
-                                                        </dt>
-                                                        <dd
-                                                            className={
-                                                                slots.length > 0
-                                                                    ? 'text-stone-200 tabular-nums'
-                                                                    : 'text-stone-600'
-                                                            }
-                                                        >
-                                                            {slots.length > 0
-                                                                ? slots
-                                                                      .map(
-                                                                          (s) =>
-                                                                              `${s.start_time}–${s.end_time}`,
-                                                                      )
-                                                                      .join(
-                                                                          ', ',
-                                                                      )
-                                                                : 'Descansa'}
-                                                        </dd>
-                                                    </div>
+                                                        <span aria-hidden>
+                                                            {short}
+                                                        </span>
+                                                        <span className="sr-only">
+                                                            {works
+                                                                ? `${long} ${hours}`
+                                                                : `${long} descansa`}
+                                                        </span>
+                                                    </li>
                                                 );
                                             })}
-                                        </dl>
+                                        </ul>
 
                                         <button
                                             type="button"
@@ -317,7 +435,7 @@ export default function Welcome() {
                                                     employee.id,
                                                 )
                                             }
-                                            className="cursor-pointer self-start text-left text-sm font-medium text-red-500 hover:text-red-400 md:text-right"
+                                            className="mt-7 w-full cursor-pointer rounded-sm border border-stone-600 px-4 py-2.5 text-sm font-semibold text-stone-100 transition-colors hover:border-red-500 hover:bg-red-600"
                                         >
                                             Agendar con{' '}
                                             {employee.name.split(' ')[0]}
@@ -329,27 +447,33 @@ export default function Welcome() {
                     </section>
                 )}
 
-                {/* Antes de tu cita */}
-                <section
-                    id="antes"
-                    className="scroll-mt-6 border-t border-stone-800"
-                >
-                    <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
-                        <SectionTitle
+                {/* Antes de tu cita: línea de pasos sobre papel */}
+                <section id="antes" className="scroll-mt-6 bg-paper-dark text-ink">
+                    <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-24">
+                        <SectionHeading
+                            eyebrow="Lo que necesitas saber"
                             title="Antes de tu cita"
-                            aside="Lo que necesitas saber"
+                            tone="paper"
                         />
-                        <ol className="mt-2 grid gap-x-16 gap-y-8 sm:grid-cols-2">
+
+                        <ol className="relative mt-14 grid gap-10 md:grid-cols-4 md:gap-6">
+                            <span
+                                aria-hidden
+                                className="absolute top-8 right-[12.5%] left-[12.5%] hidden border-t-2 border-dashed border-ink/40 md:block"
+                            />
                             {AFTER_BOOKING.map((item, i) => (
-                                <li key={item.title} className="flex gap-5">
-                                    <span className="font-display text-4xl font-semibold text-red-500 tabular-nums">
-                                        {String(i + 1).padStart(2, '0')}
+                                <li
+                                    key={item.title}
+                                    className="relative flex gap-5 md:flex-col md:items-center md:text-center"
+                                >
+                                    <span className="grid size-16 shrink-0 place-items-center rounded-full border-2 border-ink bg-red-600 font-display text-3xl font-bold text-white shadow-[3px_3px_0_0_#0c0a09]">
+                                        {i + 1}
                                     </span>
                                     <div>
-                                        <h3 className="text-lg font-medium">
+                                        <h3 className="font-tattoo text-3xl leading-none md:mt-5">
                                             {item.title}
                                         </h3>
-                                        <p className="mt-1 text-sm leading-relaxed text-stone-400">
+                                        <p className="mt-2 text-sm leading-relaxed text-stone-700">
                                             {item.text}
                                         </p>
                                     </div>
@@ -362,11 +486,15 @@ export default function Welcome() {
                 {/* Reserva */}
                 <section
                     id="agendar"
-                    className="scroll-mt-6 border-t border-stone-800 bg-stone-900"
+                    className="scroll-mt-6 border-t-2 border-ink bg-ink"
                 >
-                    <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
-                        <SectionTitle title="Agenda tu cita" />
-                        <div className="mt-8">
+                    <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-24">
+                        <SectionHeading
+                            eyebrow="En línea, en 2 minutos"
+                            title="Agenda tu cita"
+                            tone="ink"
+                        />
+                        <div className="mt-14 border border-stone-800 bg-stone-950 p-5 sm:p-8">
                             <BookingWizard
                                 services={services}
                                 productCategories={productCategories}
